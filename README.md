@@ -40,12 +40,14 @@ Shared features:
 | Cycle Tracks | Not run live yet |
 | ROW | Not run live yet |
 
-Recent fixes not yet confirmed in a live run: Portrait beat label (it was saved hidden in the layout and ran past
-the border; now turned on and right-aligned on the title line), and DLA hiding labels on unserviced local roads.
+Recent changes not yet confirmed in a live run: works in anyone's project (bundled layouts + symbology, finds
+the user's own connection); Portrait beat label (was saved hidden and ran past the border); Portrait Equipment
+table moved clear of the Beat Stats table; DLA hides labels on unserviced local roads. The "own project" setup was
+tested end to end in a stripped project (no maps or layouts) for BPX, Sidewalk, Salt/Plow and DLA.
 
 ## Data and output
-- All data is read from **QA** (`winterops_qa`): streets and beats from the `TCL_WINTER_OPERATIONS` layer in the
-  layout's map; `BEAT_EQUIPMENT_ASSIGNMENT` and `TS_BS_PXO` through a fixed connection-file path in the tool.
+- All data is read from **QA** (`winterops_qa`) through the user's own connection: streets and beats from the
+  `TCL_WINTER_OPERATIONS` layer in the layout's map, plus `BEAT_EQUIPMENT_ASSIGNMENT` and `TS_BS_PXO`.
 - **Beat Stats tables** are written to the **default geodatabase of the open project** (created on the first run,
   emptied and refilled on every run): `MapSeriesExport_BeatStats_v2`, `_RoadClass_v1`, `_BPX_v1`, `_DLA_v1`.
   Each user should have their own project or default geodatabase. Two people sharing one geodatabase at the
@@ -56,19 +58,43 @@ the border; now turned on and right-aligned on the title line), and DLA hiding l
 1. Live test Cycle Tracks (try CT142) and ROW.
 2. **ROW equipment:** needs a `row_beat` column on `BEAT_EQUIPMENT_ASSIGNMENT`.
 3. Remove the temporary `CHECKPOINT` debug messages in `execute()`.
-4. **Portability:** the connection to `winterops_qa` is a hard-coded local `.sde` file path. Other users need
-   their own connection file, and the path should become a tool parameter.
-5. Optional: a QA / production switch (staying on QA for now).
-6. The Portrait layout's scale bar sits below the bottom border (layout setting, not the tool).
+4. Optional: a QA / production switch (staying on QA for now).
+5. The Portrait layout's scale bar sits below the bottom border (layout setting, not the tool).
+6. Live test of the "own project" setup by a second user.
 
 ## Requirements
 - ArcGIS Pro 3.x
-- An enterprise geodatabase connection to `winterops_qa` (not included in this repository, because connection
-  files contain credentials)
-- A project with the "Universal Beat Map Series - Landscape" / "- Portrait" layouts and the reference layers
-  in the "Sidewalks" map
+- Your own database connection (`.sde`) to `winterops_qa`. Not included here, because connection files contain
+  credentials.
 
-## Usage
-Add `MapSeriesExportTools.pyt` to the project (Catalog → Toolboxes → Add Toolbox), open **Export Map Series
-By Beat**, pick the activity, layouts and output folder, and optionally a contract area or beats, then run.
-Run it from inside the project; it uses the project that's currently open.
+## Using it in your own project
+1. Download the repo and keep `MapSeriesExportTools.pyt` and the `MapSeriesExportTools_templates` folder
+   **side by side**.
+2. In your project, make a database connection to `winterops_qa` (Catalog → Databases → New Database Connection)
+   and save the `.sde` in your project folder. The tool finds it automatically; or pick it in the tool's
+   **Database Connection** setting.
+3. Add the toolbox (Catalog → Toolboxes → Add Toolbox), open **Export Map Series By Beat**, pick the activity and
+   an output folder, and run. Leave **Landscape Layout** blank.
+
+What happens on the first run in a new project:
+- If the project doesn't have the "Universal Beat Map Series - Landscape" / "- Portrait" layouts, they're added
+  from `MapSeriesExportTools_templates` (each brings its own map). If you already imported the layouts someone
+  shared with you, those are used instead.
+- `TCL_WINTER_OPERATIONS` is added to the layout's map from your connection.
+- Symbology comes with the tool: street labels (bold on the route, regular in the background), the Sidewalk colours
+  and legend, and the BPX symbols are read from the `.lyrx` files in the templates folder. If your project has a
+  "Sidewalks" map with the reference layers, those win, so restyling them there changes the printed maps.
+- The Beat Stats tables are created in your project's default geodatabase.
+
+## Templates folder
+| File | What it is |
+|---|---|
+| `Beat Map Landscape.pagx`, `Beat Map Portrait.pagx` | The Universal layouts, with no data layers in their maps |
+| `street_labels_bold.lyrx` | Bold route labels; also the Sidewalk symbology |
+| `street_labels_regular.lyrx` | Regular background labels |
+| `sidewalk_legend.lyrx` | Sidewalk legend wording |
+| `bpx_points.lyrx` | Bus stop / PXO / traffic signal symbols |
+
+The files carry no passwords or server names. After changing the layouts or reference layers in the master
+project, rebuild them with `build_templates.py` (run with ArcGIS Pro's Python, Pro closed):
+`python build_templates.py <output folder>`.

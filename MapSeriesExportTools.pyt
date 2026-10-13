@@ -90,9 +90,34 @@ JUNK_BEAT_PREFIXES = ("NO SERVICE",)
 # on every parameter edit, so don't re-scan the source data each time.
 _DISTINCT_VALUE_CACHE = {}
 
-EQUIPMENT_TABLE_SDE_PATH = (
-    r"D:\Users\rboyce\Documents\ArcGIS\Projects\Sidewalks\PostgreSQL-afdcc-pg-winterops_qa(gisadmin).sde"
-    r"\winterops_qa.gisadmin.BEAT_EQUIPMENT_ASSIGNMENT")
+# ---- data connection (per user) ----
+# Every enterprise dataset is read through the user's OWN connection file to
+# this database: the "Database Connection" parameter if set, else the first
+# .sde found (project's database connections, project folder, toolbox
+# folder) whose database is DATABASE_NAME. See _find_connection.
+DATABASE_NAME = "winterops_qa"
+DATASET_PREFIX = "winterops_qa.gisadmin."
+STREETS_TABLE = "TCL_WINTER_OPERATIONS"
+BPX_POINTS_TABLE = "TS_BS_PXO"
+EQUIPMENT_TABLE = "BEAT_EQUIPMENT_ASSIGNMENT"
+# set by updateParameters/execute from the parameter (or auto-found)
+_CONNECTION = {"path": None}
+
+# ---- bundled templates (ship next to this .pyt) ----
+# Used when the open project doesn't have its own: the two Universal
+# layouts (.pagx, imported on first run) and the reference layers whose
+# symbology/labels get copied (.lyrx). Built from Ramon's Sidewalks
+# project; the files carry no data connection details.
+try:
+    TOOL_DIR = os.path.dirname(os.path.abspath(__file__))
+except NameError:   # not every loader sets __file__
+    TOOL_DIR = os.getcwd()
+TEMPLATE_DIR = os.path.join(TOOL_DIR, "MapSeriesExportTools_templates")
+LAYOUT_LANDSCAPE_NAME = "Universal Beat Map Series - Landscape"
+LAYOUT_PORTRAIT_NAME = "Universal Beat Map Series - Portrait"
+TEMPLATE_LAYOUT_FILES = {LAYOUT_LANDSCAPE_NAME: "Beat Map Landscape.pagx",
+                         LAYOUT_PORTRAIT_NAME: "Beat Map Portrait.pagx"}
+
 BEAT_STATS_TABLE_NAME = "MapSeriesExport_BeatStats_v2"
 
 # reference layer whose label classes (road-class-keyed, e.g. ARTERIALS/
@@ -178,9 +203,6 @@ ROUTE_STYLE_BY_ACTIVITY = {
 # stops, PXOs, traffic signals), ACTIVE ones only, one symbol per type,
 # drawn over the street network (TCL_WINTER_OPERATIONS) as background, and
 # a count-by-type Beat Stats table instead of KMS.
-_SDE = r"D:\Users\rboyce\Documents\ArcGIS\Projects\Sidewalks\PostgreSQL-afdcc-pg-winterops_qa(gisadmin).sde"
-BPX_POINTS_SDE_PATH = _SDE + r"\winterops_qa.gisadmin.TS_BS_PXO"
-STREETS_SDE_PATH = _SDE + r"\winterops_qa.gisadmin.TCL_WINTER_OPERATIONS"
 BPX_TYPE_FIELD = "tsbspxo"
 # activity -> (field, value) - only rows with that value are used anywhere
 ACTIVE_FILTER_BY_ACTIVITY = {"BPX": ("active_status", "ACTIVE")}
@@ -214,6 +236,64 @@ DLA_LEGEND_LAYER_NAME_PREFIX = "DLA Legend"
 TOOL_LAYER_NAME_PREFIXES = ((ROUTE_HIGHLIGHT_LAYER_NAME_PREFIX, SIDEWALK_LEGEND_LAYER_NAME_PREFIX)
                             + tuple(s["label"] for s in ROUTE_STYLE_BY_ACTIVITY.values())
                             + (BPX_LEGEND_LAYER_NAME_PREFIX, DLA_LEGEND_LAYER_NAME_PREFIX))
+
+# reference layer name -> bundled .lyrx used when the project has no
+# "Sidewalks" map with that layer
+TEMPLATE_LAYER_FILES = {
+    LABEL_CLASS_REFERENCE_LAYER: "street_labels_bold.lyrx",
+    LABEL_CLASS_BASEMAP_REFERENCE_LAYER: "street_labels_regular.lyrx",
+    SIDEWALK_LEGEND_REFERENCE_LAYER: "sidewalk_legend.lyrx",
+    BPX_POINTS_TABLE: "bpx_points.lyrx",
+}
+
+
+def _is_our_database(sde):
+    try:
+        return arcpy.Describe(sde).connectionProperties.database.lower() == DATABASE_NAME
+    except Exception:
+        return False
+
+
+def _find_connection(explicit=None):
+    """Path of the user's .sde connection to DATABASE_NAME, or None."""
+    if explicit:
+        return explicit
+    if _CONNECTION["path"] and arcpy.Exists(_CONNECTION["path"]):
+        return _CONNECTION["path"]
+    candidates = []
+    try:
+        aprx = arcpy.mp.ArcGISProject("CURRENT")
+        candidates += [d.get("databasePath") for d in (aprx.databases or [])
+                       if str(d.get("databasePath", "")).lower().endswith(".sde")]
+        folders = [aprx.homeFolder]
+    except Exception:
+        folders = []
+    folders.append(TOOL_DIR)
+    for folder in folders:
+        try:
+            candidates += [os.path.join(folder, f) for f in sorted(os.listdir(folder))
+                           if f.lower().endswith(".sde")]
+        except Exception:
+            continue
+    # name hint first (cheap), then ask each file which database it is
+    candidates.sort(key=lambda p: DATABASE_NAME not in os.path.basename(p).lower())
+    for c in candidates:
+        if c and os.path.exists(c) and _is_our_database(c):
+            _CONNECTION["path"] = c
+            return c
+    return None
+
+
+def _ds(table):
+    """Full path of an enterprise dataset through the user's connection."""
+    sde = _find_connection()
+    if not sde:
+        raise RuntimeError(
+            f"No database connection to '{DATABASE_NAME}' found. Make a database connection to it "
+            f"(Catalog > Databases > New Database Connection), save the .sde in your project folder, "
+            f"or pick it in this tool's 'Database Connection' setting.")
+    return os.path.join(sde, DATASET_PREFIX + table)
+
 
 TITLE_TEXT_BY_ACTIVITY = {
     "Salt/Plow":            "SALT & PLOW",
@@ -271,14 +351,16 @@ class ExportBeatMapSeries(object):
         p_activity.value = ACTIVITIES[0]
 
         p_layout_l = arcpy.Parameter(
-            displayName="Landscape Layout",
+            displayName=f"Landscape Layout (optional - blank uses '{LAYOUT_LANDSCAPE_NAME}', "
+                        f"added to the project if it's missing)",
             name="layout_landscape",
             datatype="GPLayout",
-            parameterType="Required",
+            parameterType="Optional",
             direction="Input")
 
         p_layout_p = arcpy.Parameter(
-            displayName="Portrait Layout (optional - landscape used for every page if omitted)",
+            displayName="Portrait Layout (optional - with Landscape blank, the Universal Portrait layout is used; "
+                        "otherwise landscape for every page if omitted)",
             name="layout_portrait",
             datatype="GPLayout",
             parameterType="Optional",
@@ -385,10 +467,17 @@ class ExportBeatMapSeries(object):
             parameterType="Optional",
             direction="Input")
 
+        p_connection = arcpy.Parameter(
+            displayName=f"Database Connection (optional - your .sde to {DATABASE_NAME}; found automatically if blank)",
+            name="connection",
+            datatype="DEWorkspace",
+            parameterType="Optional",
+            direction="Input")
+
         return [p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
                 p_contract_area, p_beats,
                 p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-                p_heading, p_dpi, p_equip_field_override]
+                p_heading, p_dpi, p_equip_field_override, p_connection]
 
     def isLicensed(self):
         return True
@@ -404,8 +493,9 @@ class ExportBeatMapSeries(object):
         target_map = None
         if p_map.value:
             target_map = next((m for m in aprx.listMaps() if m.name == p_map.valueAsText), None)
-        if target_map is None and p_layout_l.value:
-            lay = next((l for l in aprx.listLayouts() if l.name == p_layout_l.valueAsText), None)
+        if target_map is None:
+            lay_name = p_layout_l.valueAsText if p_layout_l.value else LAYOUT_LANDSCAPE_NAME
+            lay = next((l for l in aprx.listLayouts() if l.name == lay_name), None)
             frames = lay.listElements("MAPFRAME_ELEMENT") if lay else []
             target_map = frames[0].map if frames else None
         if target_map is None:
@@ -519,18 +609,26 @@ class ExportBeatMapSeries(object):
         (p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
          p_contract_area, p_beats,
          p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-         p_heading, p_dpi, p_equip_field_override) = parameters
+         p_heading, p_dpi, p_equip_field_override, p_connection) = parameters
 
-        if not p_layout_l.value:
-            return
+        if p_connection.valueAsText:
+            _CONNECTION["path"] = p_connection.valueAsText
         try:
             layers = self._candidate_layers(p_layout_l, p_map, p_map_layers)
         except Exception:
+            layers = []
+        try:
+            if str(p_activity.value) == "BPX":
+                # BPX always reads the enterprise TS_BS_PXO points, whether or
+                # not they're in the map yet
+                layers = [_ds(BPX_POINTS_TABLE)]
+            elif not any(c.lower() in self._layer_fields(l)
+                         for l in layers for c in BEAT_FIELD_CANDIDATES.get(str(p_activity.value), [])):
+                # no layout/map with the streets yet (e.g. a new project) -
+                # read the streets straight from the database
+                layers = [_ds(STREETS_TABLE)]
+        except Exception:
             return
-        if str(p_activity.value) == "BPX":
-            # BPX always reads the enterprise TS_BS_PXO points, whether or
-            # not they're in the map yet
-            layers = [BPX_POINTS_SDE_PATH]
 
         if p_activity.value and not p_beat_field.altered:
             candidates = BEAT_FIELD_CANDIDATES.get(str(p_activity.value), [])
@@ -892,19 +990,51 @@ class ExportBeatMapSeries(object):
                 pass
 
     @staticmethod
-    def _get_reference_label_classes(aprx, messages, layer_name=LABEL_CLASS_REFERENCE_LAYER):
+    def _reference_layer_cim(aprx, layer_name, messages):
+        """CIM of a reference layer: the project's own copy in the
+        "Sidewalks" map if there is one (so restyling it there changes the
+        maps), else the bundled .lyrx (TEMPLATE_LAYER_FILES). None if
+        neither is found."""
         try:
             ref_m = next((m for m in aprx.listMaps() if m.name == LABEL_CLASS_REFERENCE_MAP), None)
-            ref_lyr = next((l for l in ref_m.listLayers() if l.name == layer_name), None) \
-                if ref_m else None
-            if not ref_lyr:
-                messages.addMessage(
-                    f"Label-class reference layer '{layer_name}' not found in "
-                    f"map '{LABEL_CLASS_REFERENCE_MAP}' - auto street labeling skipped.")
-                return None
-            return ref_lyr.getDefinition("V3").labelClasses
+            ref_lyr = next((l for l in ref_m.listLayers() if l.name == layer_name), None) if ref_m else None
+            if ref_lyr:
+                return ref_lyr.getDefinition("V3")
         except Exception:
-            return None
+            pass
+        fname = TEMPLATE_LAYER_FILES.get(layer_name)
+        path = os.path.join(TEMPLATE_DIR, fname) if fname else None
+        if path and os.path.exists(path):
+            try:
+                return arcpy.mp.LayerFile(path).listLayers()[0].getDefinition("V3")
+            except Exception as e:
+                messages.addWarningMessage(f"Couldn't read '{path}': {e}")
+        messages.addMessage(f"Reference layer '{layer_name}' not found (no '{LABEL_CLASS_REFERENCE_MAP}' "
+                            f"map layer and no bundled {fname or 'file'}).")
+        return None
+
+    @staticmethod
+    def _get_reference_label_classes(aprx, messages, layer_name=LABEL_CLASS_REFERENCE_LAYER):
+        cim = ExportBeatMapSeries._reference_layer_cim(aprx, layer_name, messages)
+        return cim.labelClasses if cim is not None else None
+
+    @staticmethod
+    def _ensure_template_layout(aprx, name, messages):
+        """The project's layout called `name`, importing the bundled .pagx
+        (it brings its own map) if the project doesn't have it."""
+        lay = next((l for l in aprx.listLayouts() if l.name == name), None)
+        if lay:
+            return lay
+        path = os.path.join(TEMPLATE_DIR, TEMPLATE_LAYOUT_FILES[name])
+        if not os.path.exists(path):
+            raise RuntimeError(f"Layout '{name}' isn't in this project and the template {path} is missing. "
+                               f"Import the layout, or pick a layout in 'Landscape Layout'.")
+        aprx.importDocument(path)
+        lay = next((l for l in aprx.listLayouts() if l.name == name), None)
+        if not lay:
+            raise RuntimeError(f"Imported {path} but no layout named '{name}' came with it.")
+        messages.addMessage(f"Added layout '{name}' to this project from {os.path.basename(path)}.")
+        return lay
 
     @staticmethod
     def _apply_label_classes(new_lyr, ref_label_classes, messages):
@@ -1295,14 +1425,9 @@ class ExportBeatMapSeries(object):
 
     @staticmethod
     def _get_reference_renderer(aprx, layer_name, messages):
-        """The renderer CIM of a reference layer in the Sidewalks map, or None."""
-        ref_m = next((m for m in aprx.listMaps() if m.name == LABEL_CLASS_REFERENCE_MAP), None)
-        ref_lyr = next((l for l in ref_m.listLayers() if l.name == layer_name), None) if ref_m else None
-        if not ref_lyr:
-            messages.addMessage(f"Symbology reference layer '{layer_name}' not found in map "
-                                f"'{LABEL_CLASS_REFERENCE_MAP}'.")
-            return None
-        return ref_lyr.getDefinition("V3").renderer
+        """The renderer CIM of a reference layer (see _reference_layer_cim), or None."""
+        cim = ExportBeatMapSeries._reference_layer_cim(aprx, layer_name, messages)
+        return cim.renderer if cim is not None else None
 
     @staticmethod
     def _apply_reference_renderer(lyr, renderer, field_candidates):
@@ -1492,7 +1617,7 @@ class ExportBeatMapSeries(object):
         tool adds its own TS_BS_PXO layer (that one has Pro's default look)."""
         # table name only - Ramon's styled layer can point at production
         # (winterops.gisadmin.TS_BS_PXO) while the tool reads QA
-        table = BPX_POINTS_SDE_PATH.split(".")[-1].lower()       # "ts_bs_pxo"
+        table = BPX_POINTS_TABLE.lower()
         maps = [preferred_map] + [m for m in aprx.listMaps() if m.name != preferred_map.name]
         for m in maps:
             for lyr in m.listLayers():
@@ -1508,7 +1633,14 @@ class ExportBeatMapSeries(object):
                         [f.lower() for f in (r.fields or [])] == [BPX_TYPE_FIELD]:
                     messages.addMessage(f"BPX symbology copied from '{lyr.name}' in map '{m.name}'.")
                     return r
-        messages.addMessage("No styled TS_BS_PXO layer found in the project - using the built-in BPX symbols.")
+        path = os.path.join(TEMPLATE_DIR, TEMPLATE_LAYER_FILES[BPX_POINTS_TABLE])
+        try:
+            r = arcpy.mp.LayerFile(path).listLayers()[0].getDefinition("V3").renderer
+            messages.addMessage(f"BPX symbology from the bundled {os.path.basename(path)}.")
+            return r
+        except Exception:
+            pass
+        messages.addMessage("No styled TS_BS_PXO layer found - using the built-in BPX symbols.")
         return None
 
     def _apply_bpx_symbology(self, lyr):
@@ -1846,14 +1978,33 @@ class ExportBeatMapSeries(object):
                 or next((e for e in frames if e.name.startswith(name + " ")), None))
 
     @staticmethod
+    def _keep_equipment_clear_of_stats(layout, messages):
+        """Equipment table just right of the Beat Stats frame when they
+        overlap - Portrait's frames overlap by ~0.9" and the 4-column
+        Salt/Plow table ran under the equipment (2026-10-13)."""
+        stats = ExportBeatMapSeries._find_table_frame(layout, "Beat Stats Table")
+        equip = ExportBeatMapSeries._find_table_frame(layout, "Equipment Table")
+        if not stats or not equip:
+            return
+        right = stats.elementPositionX + stats.elementWidth + 0.15
+        if equip.elementPositionX < right and equip.elementPositionX + equip.elementWidth > stats.elementPositionX:
+            equip.elementPositionX = right
+            messages.addMessage(f"Moved '{equip.name}' clear of the Beat Stats table on '{layout.name}'.")
+
+    @staticmethod
     def _ensure_table_in_map(map_obj, table_path, table_name):
         """Add a table to the map if it isn't already there, and return the
         Table object either way."""
-        existing = next((t for t in map_obj.listTables() if t.name == table_name), None)
+        def _match(t):
+            try:
+                return t.name == table_name or t.dataSource.lower().endswith("." + table_name.lower())
+            except Exception:
+                return False
+        existing = next((t for t in map_obj.listTables() if _match(t)), None)
         if existing:
             return existing
-        map_obj.addDataFromPath(table_path)
-        return next(t for t in map_obj.listTables() if t.name == table_name)
+        added = map_obj.addDataFromPath(table_path)
+        return next((t for t in map_obj.listTables() if _match(t)), added)
 
     @staticmethod
     def _set_table_frame_query(el, where_clause):
@@ -1969,6 +2120,9 @@ class ExportBeatMapSeries(object):
             # schema change, so it can hit the same "exclusive schema lock"
             # issue as any other if the table's bound to a live map/layout -
             # warn and move on rather than crash if so.
+            current = {f.name: f.aliasName for f in arcpy.ListFields(out_path)}
+            if all(current.get(f) == a for f, a in aliases.items()):
+                return
             try:
                 for fname, alias in aliases.items():
                     arcpy.management.AlterField(out_path, fname, new_field_alias=alias)
@@ -2053,7 +2207,7 @@ class ExportBeatMapSeries(object):
                 f"equipment table hidden (set 'Equipment Table Beat Field Override' "
                 f"if this activity's field has a different name).")
             return None
-        tbl = self._ensure_table_in_map(mf.map, EQUIPMENT_TABLE_SDE_PATH, "BEAT_EQUIPMENT_ASSIGNMENT")
+        tbl = self._ensure_table_in_map(mf.map, _ds(EQUIPMENT_TABLE), EQUIPMENT_TABLE)
         el.table = tbl
         self._set_table_fields(el, ["equipment_assignment_id"])
         # column heading "EQUIPMENT" instead of the raw field name (per Ramon).
@@ -2158,7 +2312,8 @@ class ExportBeatMapSeries(object):
         (p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
          p_contract_area, p_beats,
          p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-         p_heading, p_dpi, p_equip_field_override) = parameters
+         p_heading, p_dpi, p_equip_field_override, p_connection) = parameters
+        _CONNECTION["path"] = p_connection.valueAsText or None
 
         activity = str(p_activity.value)
         self._activity = activity
@@ -2191,8 +2346,15 @@ class ExportBeatMapSeries(object):
             aprx, messages, layer_name=LABEL_CLASS_BASEMAP_REFERENCE_LAYER)
         messages.addMessage("CHECKPOINT 4: got reference label classes, about to resolve layouts/map frames")
 
-        layoutL = self._get_layout(aprx, layout_l_name)
-        layoutP = self._get_layout(aprx, layout_p_name) if layout_p_name else None
+        if layout_l_name:
+            layoutL = self._get_layout(aprx, layout_l_name)
+            layoutP = self._get_layout(aprx, layout_p_name) if layout_p_name else None
+        else:
+            # the Universal layouts - this project's own copy, else the
+            # bundled template (imported once, then reused)
+            layoutL = self._ensure_template_layout(aprx, LAYOUT_LANDSCAPE_NAME, messages)
+            layoutP = (self._get_layout(aprx, layout_p_name) if layout_p_name
+                       else self._ensure_template_layout(aprx, LAYOUT_PORTRAIT_NAME, messages))
         mfL = self._pick_map_frame(layoutL)
         mfP = self._pick_map_frame(layoutP) if layoutP else mfL
         messages.addMessage("CHECKPOINT 5: got map frames, about to resolve target map")
@@ -2256,6 +2418,16 @@ class ExportBeatMapSeries(object):
         else:
             fit_layers_L = self._visible_fit_layers(mfL, beat_field)
             fit_layers_P = self._visible_fit_layers(mfP, beat_field) if mfP is not mfL else fit_layers_L
+            if not fit_layers_L and activity != "BPX":
+                # nothing in the map carries the beat field (e.g. a freshly
+                # imported layout) - add the streets from the database
+                for map_obj in {id(mfL.map): mfL.map, id(mfP.map): mfP.map}.values():
+                    lyr, added = self._find_or_add_layer(map_obj, _ds(STREETS_TABLE))
+                    lyr.visible = True
+                    if added:
+                        messages.addMessage(f"Added '{lyr.name}' to map '{map_obj.name}' from {_find_connection()}.")
+                fit_layers_L = self._visible_fit_layers(mfL, beat_field)
+                fit_layers_P = self._visible_fit_layers(mfP, beat_field) if mfP is not mfL else fit_layers_L
             messages.addMessage(f"Auto-detected fit layers: {[l.name for l in fit_layers_L]}")
 
         # BPX: always the enterprise TS_BS_PXO points (added to the map if
@@ -2269,8 +2441,8 @@ class ExportBeatMapSeries(object):
             self._bpx_ref_renderer = self._find_bpx_reference_renderer(aprx, mfL.map, messages)
 
             def _bpx_layers_for(map_obj):
-                pts, added_p = self._find_or_add_layer(map_obj, BPX_POINTS_SDE_PATH)
-                st, added_s = self._find_or_add_layer(map_obj, STREETS_SDE_PATH)
+                pts, added_p = self._find_or_add_layer(map_obj, _ds(BPX_POINTS_TABLE))
+                st, added_s = self._find_or_add_layer(map_obj, _ds(STREETS_TABLE))
                 for lyr, added in ((pts, added_p), (st, added_s)):
                     if added:
                         bpx_added.append((map_obj, lyr))
@@ -2404,7 +2576,7 @@ class ExportBeatMapSeries(object):
         # the printed map(s) is hidden for other activities (it printed every
         # bus stop across a DLA page, 2026-10-13) and turned back on at the end
         if not bpx_mode:
-            bpx_table = BPX_POINTS_SDE_PATH.split(".")[-1].lower()
+            bpx_table = BPX_POINTS_TABLE.lower()
             for map_obj in {id(mfL.map): mfL.map, id(mfP.map): mfP.map}.values():
                 for lyr in map_obj.listLayers():
                     try:
@@ -2496,6 +2668,7 @@ class ExportBeatMapSeries(object):
             # table look lives on the layouts themselves (set 2026-10-08) and
             # is kept through column changes by _set_table_fields
             eq_field = self._bind_equipment_table(lay, mf, activity, equip_field_override, messages)
+            self._keep_equipment_clear_of_stats(lay, messages)
             if lay is layoutL:
                 equipment_field_L = eq_field
             else:
