@@ -1,0 +1,3974 @@
+{
+  "type" : "CIMLayerDocument",
+  "version" : "3.5.0",
+  "build" : 57366,
+  "layers" : [
+    "CIMPATH=2026_27_Changes/TS_BS_PXO.json"
+  ],
+  "layerDefinitions" : [
+    {
+      "type" : "CIMFeatureLayer",
+      "name" : "TS_BS_PXO",
+      "uRI" : "CIMPATH=2026_27_Changes/TS_BS_PXO.json",
+      "sourceModifiedTime" : {
+        "type" : "TimeInstant"
+      },
+      "useSourceMetadata" : true,
+      "description" : "TS_BS_PXO",
+      "layerElevation" : {
+        "type" : "CIMLayerElevationSurface",
+        "elevationSurfaceLayerURI" : "CIMPATH=Map/278606edd41e40059da631e486370b87.json"
+      },
+      "expanded" : true,
+      "layerType" : "Operational",
+      "showLegends" : true,
+      "visibility" : true,
+      "displayCacheType" : "Permanent",
+      "maxDisplayCacheAge" : 5,
+      "showPopups" : true,
+      "serviceLayerID" : -1,
+      "refreshRate" : -1,
+      "refreshRateUnit" : "esriTimeUnitsSeconds",
+      "blendingMode" : "Alpha",
+      "allowDrapingOnIntegratedMesh" : true,
+      "autoGenerateFeatureTemplates" : true,
+      "featureElevationExpression" : "0",
+      "featureTable" : {
+        "type" : "CIMFeatureTable",
+        "displayField" : "stop_name",
+        "editable" : true,
+        "dataConnection" : {
+          "type" : "CIMStandardDataConnection",
+          "workspaceConnectionString" : "SERVER=;INSTANCE=;DBCLIENT=postgresql;DB_CONNECTION_PROPERTIES=;DATABASE=winterops_qa;USER=;VERSION=sde.DEFAULT;AUTHENTICATION_MODE=DBMS",
+          "workspaceFactory" : "SDE",
+          "dataset" : "winterops_qa.gisadmin.TS_BS_PXO",
+          "datasetType" : "esriDTFeatureClass"
+        },
+        "studyAreaSpatialRel" : "esriSpatialRelUndefined",
+        "searchOrder" : "esriSearchOrderSpatial"
+      },
+      "htmlPopupEnabled" : true,
+      "selectable" : true,
+      "featureCacheType" : "Session",
+      "displayFiltersType" : "ByScale",
+      "featureBlendingMode" : "Alpha",
+      "layerEffectsMode" : "Layer",
+      "labelClasses" : [
+        {
+          "type" : "CIMLabelClass",
+          "expressionTitle" : "Custom",
+          "expression" : "$feature['stop_name']",
+          "expressionEngine" : "Arcade",
+          "featuresToLabel" : "AllVisibleFeatures",
+          "maplexLabelPlacementProperties" : {
+            "type" : "CIMMaplexLabelPlacementProperties",
+            "featureType" : "Point",
+            "avoidPolygonHoles" : true,
+            "canOverrunFeature" : true,
+            "canPlaceLabelOutsidePolygon" : true,
+            "canRemoveOverlappingLabel" : true,
+            "canStackLabel" : true,
+            "centerLabelAnchorType" : "Symbol",
+            "connectionType" : "Unambiguous",
+            "constrainOffset" : "NoConstraint",
+            "contourAlignmentType" : "Page",
+            "contourLadderType" : "Straight",
+            "contourMaximumAngle" : 90,
+            "enableConnection" : true,
+            "enablePointPlacementPriorities" : true,
+            "featureWeight" : 0,
+            "fontHeightReductionLimit" : 4,
+            "fontHeightReductionStep" : 0.5,
+            "fontWidthReductionLimit" : 90,
+            "fontWidthReductionStep" : 5,
+            "graticuleAlignmentType" : "Straight",
+            "keyNumberGroupName" : "Default",
+            "labelBuffer" : 15,
+            "labelLargestPolygon" : true,
+            "labelPriority" : -1,
+            "labelStackingProperties" : {
+              "type" : "CIMMaplexLabelStackingProperties",
+              "stackAlignment" : "ChooseBest",
+              "maximumNumberOfLines" : 3,
+              "minimumNumberOfCharsPerLine" : 3,
+              "maximumNumberOfCharsPerLine" : 24,
+              "separators" : [
+                {
+                  "type" : "CIMMaplexStackingSeparator",
+                  "separator" : " ",
+                  "splitAfter" : true
+                },
+                {
+                  "type" : "CIMMaplexStackingSeparator",
+                  "separator" : ",",
+                  "visible" : true,
+                  "splitAfter" : true
+                }
+              ],
+              "trimStackingSeparators" : true,
+              "preferToStackLongLabels" : true
+            },
+            "lineFeatureType" : "General",
+            "linePlacementMethod" : "OffsetCurvedFromLine",
+            "maximumLabelOverrun" : 36,
+            "maximumLabelOverrunUnit" : "Point",
+            "minimumFeatureSizeUnit" : "Map",
+            "multiPartOption" : "OneLabelPerPart",
+            "offsetAlongLineProperties" : {
+              "type" : "CIMMaplexOffsetAlongLineProperties",
+              "placementMethod" : "BestPositionAlongLine",
+              "labelAnchorPoint" : "CenterOfLabel",
+              "distanceUnit" : "Percentage",
+              "useLineDirection" : true
+            },
+            "pointExternalZonePriorities" : {
+              "type" : "CIMMaplexExternalZonePriorities",
+              "aboveLeft" : 4,
+              "aboveCenter" : 2,
+              "aboveRight" : 1,
+              "centerRight" : 3,
+              "belowRight" : 5,
+              "belowCenter" : 7,
+              "belowLeft" : 8,
+              "centerLeft" : 6
+            },
+            "pointPlacementMethod" : "AroundPoint",
+            "polygonAnchorPointType" : "GeometricCenter",
+            "polygonBoundaryWeight" : 0,
+            "polygonExternalZones" : {
+              "type" : "CIMMaplexExternalZonePriorities",
+              "aboveLeft" : 4,
+              "aboveCenter" : 2,
+              "aboveRight" : 1,
+              "centerRight" : 3,
+              "belowRight" : 5,
+              "belowCenter" : 7,
+              "belowLeft" : 8,
+              "centerLeft" : 6
+            },
+            "polygonFeatureType" : "General",
+            "polygonInternalZones" : {
+              "type" : "CIMMaplexInternalZonePriorities",
+              "center" : 1
+            },
+            "polygonPlacementMethod" : "CurvedInPolygon",
+            "primaryOffset" : 1,
+            "primaryOffsetUnit" : "Point",
+            "removeAmbiguousLabels" : "All",
+            "removeExtraWhiteSpace" : true,
+            "repetitionIntervalUnit" : "Point",
+            "rotationProperties" : {
+              "type" : "CIMMaplexRotationProperties",
+              "rotationType" : "Arithmetic",
+              "alignmentType" : "Straight"
+            },
+            "secondaryOffset" : 100,
+            "secondaryOffsetUnit" : "Percentage",
+            "strategyPriorities" : {
+              "type" : "CIMMaplexStrategyPriorities",
+              "stacking" : 1,
+              "overrun" : 2,
+              "fontCompression" : 3,
+              "fontReduction" : 4,
+              "abbreviation" : 5
+            },
+            "thinningDistanceUnit" : "Point",
+            "truncationMarkerCharacter" : ".",
+            "truncationMinimumLength" : 1,
+            "truncationPreferredCharacters" : "aeiou",
+            "truncationExcludedCharacters" : "0123456789",
+            "polygonAnchorPointPerimeterInsetUnit" : "Point"
+          },
+          "name" : "Class 1",
+          "priority" : -1,
+          "standardLabelPlacementProperties" : {
+            "type" : "CIMStandardLabelPlacementProperties",
+            "featureType" : "Line",
+            "featureWeight" : "None",
+            "labelWeight" : "High",
+            "numLabelsOption" : "OneLabelPerName",
+            "lineLabelPosition" : {
+              "type" : "CIMStandardLineLabelPosition",
+              "above" : true,
+              "inLine" : true,
+              "parallel" : true
+            },
+            "lineLabelPriorities" : {
+              "type" : "CIMStandardLineLabelPriorities",
+              "aboveStart" : 3,
+              "aboveAlong" : 3,
+              "aboveEnd" : 3,
+              "centerStart" : 3,
+              "centerAlong" : 3,
+              "centerEnd" : 3,
+              "belowStart" : 3,
+              "belowAlong" : 3,
+              "belowEnd" : 3
+            },
+            "pointPlacementMethod" : "AroundPoint",
+            "pointPlacementPriorities" : {
+              "type" : "CIMStandardPointPlacementPriorities",
+              "aboveLeft" : 2,
+              "aboveCenter" : 2,
+              "aboveRight" : 1,
+              "centerLeft" : 3,
+              "centerRight" : 2,
+              "belowLeft" : 3,
+              "belowCenter" : 3,
+              "belowRight" : 2
+            },
+            "rotationType" : "Arithmetic",
+            "polygonPlacementMethod" : "AlwaysHorizontal"
+          },
+          "textSymbol" : {
+            "type" : "CIMSymbolReference",
+            "symbol" : {
+              "type" : "CIMTextSymbol",
+              "blockProgression" : "TTB",
+              "depth3D" : 1,
+              "extrapolateBaselines" : true,
+              "fontEffects" : "Normal",
+              "fontEncoding" : "Unicode",
+              "fontFamilyName" : "Tahoma",
+              "fontStyleName" : "Regular",
+              "fontType" : "Unspecified",
+              "haloSize" : 1,
+              "height" : 10,
+              "hinting" : "Default",
+              "horizontalAlignment" : "Left",
+              "kerning" : true,
+              "letterWidth" : 100,
+              "ligatures" : true,
+              "lineGapType" : "ExtraLeading",
+              "symbol" : {
+                "type" : "CIMPolygonSymbol",
+                "symbolLayers" : [
+                  {
+                    "type" : "CIMSolidFill",
+                    "enable" : true,
+                    "color" : {
+                      "type" : "CIMRGBColor",
+                      "values" : [
+                        0,
+                        0,
+                        0,
+                        100
+                      ]
+                    }
+                  }
+                ],
+                "angleAlignment" : "Map"
+              },
+              "textCase" : "Normal",
+              "textDirection" : "LTR",
+              "verticalAlignment" : "Bottom",
+              "verticalGlyphOrientation" : "Right",
+              "wordSpacing" : 100,
+              "billboardMode3D" : "FaceNearPlane"
+            }
+          },
+          "useCodedValue" : true,
+          "visibility" : true,
+          "iD" : -1
+        }
+      ],
+      "renderer" : {
+        "type" : "CIMUniqueValueRenderer",
+        "sampleSize" : 10000,
+        "colorRamp" : {
+          "type" : "CIMRandomHSVColorRamp",
+          "colorSpace" : {
+            "type" : "CIMICCColorSpace",
+            "url" : "Default RGB"
+          },
+          "maxH" : 360,
+          "minS" : 15,
+          "maxS" : 30,
+          "minV" : 99,
+          "maxV" : 100,
+          "minAlpha" : 100,
+          "maxAlpha" : 100
+        },
+        "defaultLabel" : "<all other values>",
+        "defaultSymbol" : {
+          "type" : "CIMSymbolReference",
+          "symbol" : {
+            "type" : "CIMPointSymbol",
+            "symbolLayers" : [
+              {
+                "type" : "CIMVectorMarker",
+                "enable" : true,
+                "anchorPointUnits" : "Relative",
+                "dominantSizeAxis3D" : "Y",
+                "size" : 6,
+                "billboardMode3D" : "FaceNearPlane",
+                "frame" : {
+                  "xmin" : -5,
+                  "ymin" : -5,
+                  "xmax" : 5,
+                  "ymax" : 5
+                },
+                "markerGraphics" : [
+                  {
+                    "type" : "CIMMarkerGraphic",
+                    "geometry" : {
+                      "curveRings" : [
+                        [
+                          [
+                            0,
+                            5
+                          ],
+                          {
+                            "a" : [
+                              [
+                                0,
+                                5
+                              ],
+                              [
+                                1.5308084989341916e-16,
+                                0
+                              ],
+                              0,
+                              1
+                            ]
+                          }
+                        ]
+                      ]
+                    },
+                    "symbol" : {
+                      "type" : "CIMPolygonSymbol",
+                      "symbolLayers" : [
+                        {
+                          "type" : "CIMSolidStroke",
+                          "enable" : true,
+                          "capStyle" : "Round",
+                          "joinStyle" : "Round",
+                          "lineStyle3D" : "Strip",
+                          "miterLimit" : 10,
+                          "width" : 0.75,
+                          "height3D" : 1,
+                          "anchor3D" : "Center",
+                          "color" : {
+                            "type" : "CIMRGBColor",
+                            "values" : [
+                              255,
+                              255,
+                              255,
+                              100
+                            ]
+                          }
+                        },
+                        {
+                          "type" : "CIMSolidFill",
+                          "enable" : true,
+                          "color" : {
+                            "type" : "CIMRGBColor",
+                            "values" : [
+                              130,
+                              130,
+                              130,
+                              100
+                            ]
+                          }
+                        }
+                      ],
+                      "angleAlignment" : "Map"
+                    }
+                  }
+                ],
+                "scaleSymbolsProportionally" : true,
+                "respectFrame" : true
+              }
+            ],
+            "haloSize" : 1,
+            "scaleX" : 1,
+            "angleAlignment" : "Display"
+          }
+        },
+        "defaultSymbolPatch" : "Default",
+        "fields" : [
+          "TSBSPXO"
+        ],
+        "groups" : [
+          {
+            "type" : "CIMUniqueValueGroup",
+            "classes" : [
+              {
+                "type" : "CIMUniqueValueClass",
+                "label" : "BUS STOP",
+                "patch" : "Default",
+                "symbol" : {
+                  "type" : "CIMSymbolReference",
+                  "symbol" : {
+                    "type" : "CIMPointSymbol",
+                    "symbolLayers" : [
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_3976ca38-d165-4c3c-beb8-4fbf139da63e",
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 10,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : 0,
+                          "ymin" : 0,
+                          "xmax" : 17,
+                          "ymax" : 17
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    8.5,
+                                    14
+                                  ],
+                                  [
+                                    11.1199999999999992,
+                                    13.91
+                                  ],
+                                  [
+                                    12.02,
+                                    13.7899999999999991
+                                  ],
+                                  [
+                                    12.73,
+                                    13.59
+                                  ],
+                                  [
+                                    13.2899999999999991,
+                                    13.32
+                                  ],
+                                  [
+                                    13.68,
+                                    12.9700000000000006
+                                  ],
+                                  [
+                                    13.92,
+                                    12.5299999999999994
+                                  ],
+                                  [
+                                    14,
+                                    12
+                                  ],
+                                  [
+                                    14,
+                                    4
+                                  ],
+                                  [
+                                    13,
+                                    4
+                                  ],
+                                  [
+                                    13,
+                                    3
+                                  ],
+                                  [
+                                    11,
+                                    3
+                                  ],
+                                  [
+                                    11,
+                                    4
+                                  ],
+                                  [
+                                    6,
+                                    4
+                                  ],
+                                  [
+                                    6,
+                                    3
+                                  ],
+                                  [
+                                    4,
+                                    3
+                                  ],
+                                  [
+                                    4,
+                                    4
+                                  ],
+                                  [
+                                    3,
+                                    4
+                                  ],
+                                  [
+                                    3,
+                                    12
+                                  ],
+                                  [
+                                    3.0800000000000001,
+                                    12.5299999999999994
+                                  ],
+                                  [
+                                    3.3199999999999998,
+                                    12.9700000000000006
+                                  ],
+                                  [
+                                    3.71,
+                                    13.32
+                                  ],
+                                  [
+                                    4.2699999999999996,
+                                    13.59
+                                  ],
+                                  [
+                                    4.9900000000000002,
+                                    13.7899999999999991
+                                  ],
+                                  [
+                                    5.8799999999999999,
+                                    13.91
+                                  ],
+                                  [
+                                    8.5,
+                                    14
+                                  ]
+                                ],
+                                [
+                                  [
+                                    6,
+                                    13
+                                  ],
+                                  [
+                                    6,
+                                    12
+                                  ],
+                                  [
+                                    11,
+                                    12
+                                  ],
+                                  [
+                                    11,
+                                    13
+                                  ],
+                                  [
+                                    6,
+                                    13
+                                  ]
+                                ],
+                                [
+                                  [
+                                    6,
+                                    5.5
+                                  ],
+                                  [
+                                    6,
+                                    6.5
+                                  ],
+                                  [
+                                    5.96,
+                                    6.6900000000000004
+                                  ],
+                                  [
+                                    5.8600000000000003,
+                                    6.8600000000000003
+                                  ],
+                                  [
+                                    5.6900000000000004,
+                                    6.96
+                                  ],
+                                  [
+                                    5.5,
+                                    7
+                                  ],
+                                  [
+                                    4.5,
+                                    7
+                                  ],
+                                  [
+                                    4.3099999999999996,
+                                    6.96
+                                  ],
+                                  [
+                                    4.1399999999999997,
+                                    6.8600000000000003
+                                  ],
+                                  [
+                                    4.04,
+                                    6.6900000000000004
+                                  ],
+                                  [
+                                    4,
+                                    6.5
+                                  ],
+                                  [
+                                    4,
+                                    5.5
+                                  ],
+                                  [
+                                    4.04,
+                                    5.3099999999999996
+                                  ],
+                                  [
+                                    4.1500000000000004,
+                                    5.1500000000000004
+                                  ],
+                                  [
+                                    4.3099999999999996,
+                                    5.04
+                                  ],
+                                  [
+                                    4.5,
+                                    5
+                                  ],
+                                  [
+                                    5.5,
+                                    5
+                                  ],
+                                  [
+                                    5.6900000000000004,
+                                    5.04
+                                  ],
+                                  [
+                                    5.8499999999999996,
+                                    5.1500000000000004
+                                  ],
+                                  [
+                                    5.96,
+                                    5.3099999999999996
+                                  ],
+                                  [
+                                    6,
+                                    5.5
+                                  ]
+                                ],
+                                [
+                                  [
+                                    13,
+                                    5.5
+                                  ],
+                                  [
+                                    13,
+                                    6.5
+                                  ],
+                                  [
+                                    12.9600000000000009,
+                                    6.6900000000000004
+                                  ],
+                                  [
+                                    12.8599999999999994,
+                                    6.8600000000000003
+                                  ],
+                                  [
+                                    12.69,
+                                    6.96
+                                  ],
+                                  [
+                                    12.5,
+                                    7
+                                  ],
+                                  [
+                                    11.5,
+                                    7
+                                  ],
+                                  [
+                                    11.31,
+                                    6.96
+                                  ],
+                                  [
+                                    11.1400000000000006,
+                                    6.8499999999999996
+                                  ],
+                                  [
+                                    11.0399999999999991,
+                                    6.6900000000000004
+                                  ],
+                                  [
+                                    11,
+                                    6.5
+                                  ],
+                                  [
+                                    11,
+                                    5.5
+                                  ],
+                                  [
+                                    11.0399999999999991,
+                                    5.3099999999999996
+                                  ],
+                                  [
+                                    11.15,
+                                    5.1500000000000004
+                                  ],
+                                  [
+                                    11.31,
+                                    5.04
+                                  ],
+                                  [
+                                    11.5,
+                                    5
+                                  ],
+                                  [
+                                    12.5,
+                                    5
+                                  ],
+                                  [
+                                    12.69,
+                                    5.04
+                                  ],
+                                  [
+                                    12.85,
+                                    5.1500000000000004
+                                  ],
+                                  [
+                                    12.9600000000000009,
+                                    5.3099999999999996
+                                  ],
+                                  [
+                                    13,
+                                    5.5
+                                  ]
+                                ],
+                                [
+                                  [
+                                    13,
+                                    8
+                                  ],
+                                  [
+                                    13,
+                                    11
+                                  ],
+                                  [
+                                    4,
+                                    11
+                                  ],
+                                  [
+                                    4,
+                                    8
+                                  ],
+                                  [
+                                    13,
+                                    8
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidStroke",
+                                  "enable" : true,
+                                  "capStyle" : "Round",
+                                  "joinStyle" : "Round",
+                                  "lineStyle3D" : "Strip",
+                                  "miterLimit" : 10,
+                                  "width" : 0,
+                                  "height3D" : 1,
+                                  "anchor3D" : "Center",
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      0,
+                                      0,
+                                      100
+                                    ]
+                                  }
+                                },
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      51,
+                                      51,
+                                      51,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "scaleSymbolsProportionally" : true,
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 10,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -5,
+                          "ymin" : -5,
+                          "xmax" : 5,
+                          "ymax" : 5
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    -3,
+                                    5
+                                  ],
+                                  [
+                                    3,
+                                    5
+                                  ],
+                                  [
+                                    3.3500000000000001,
+                                    4.9699999999999998
+                                  ],
+                                  [
+                                    3.6800000000000002,
+                                    4.8799999999999999
+                                  ],
+                                  [
+                                    4,
+                                    4.7300000000000004
+                                  ],
+                                  [
+                                    4.2800000000000002,
+                                    4.5300000000000002
+                                  ],
+                                  [
+                                    4.5300000000000002,
+                                    4.2800000000000002
+                                  ],
+                                  [
+                                    4.7300000000000004,
+                                    4
+                                  ],
+                                  [
+                                    4.8799999999999999,
+                                    3.6800000000000002
+                                  ],
+                                  [
+                                    4.9699999999999998,
+                                    3.3500000000000001
+                                  ],
+                                  [
+                                    5,
+                                    3
+                                  ],
+                                  [
+                                    5,
+                                    -3
+                                  ],
+                                  [
+                                    4.9699999999999998,
+                                    -3.3500000000000001
+                                  ],
+                                  [
+                                    4.8799999999999999,
+                                    -3.6800000000000002
+                                  ],
+                                  [
+                                    4.7300000000000004,
+                                    -4
+                                  ],
+                                  [
+                                    4.5300000000000002,
+                                    -4.2800000000000002
+                                  ],
+                                  [
+                                    4.2800000000000002,
+                                    -4.5300000000000002
+                                  ],
+                                  [
+                                    4,
+                                    -4.7300000000000004
+                                  ],
+                                  [
+                                    3.6800000000000002,
+                                    -4.8799999999999999
+                                  ],
+                                  [
+                                    3.3500000000000001,
+                                    -4.9699999999999998
+                                  ],
+                                  [
+                                    3,
+                                    -5
+                                  ],
+                                  [
+                                    -3,
+                                    -5
+                                  ],
+                                  [
+                                    -3.3500000000000001,
+                                    -4.9699999999999998
+                                  ],
+                                  [
+                                    -3.6800000000000002,
+                                    -4.8799999999999999
+                                  ],
+                                  [
+                                    -4,
+                                    -4.7300000000000004
+                                  ],
+                                  [
+                                    -4.2800000000000002,
+                                    -4.5300000000000002
+                                  ],
+                                  [
+                                    -4.5300000000000002,
+                                    -4.2800000000000002
+                                  ],
+                                  [
+                                    -4.7300000000000004,
+                                    -4
+                                  ],
+                                  [
+                                    -4.8799999999999999,
+                                    -3.6800000000000002
+                                  ],
+                                  [
+                                    -4.9699999999999998,
+                                    -3.3500000000000001
+                                  ],
+                                  [
+                                    -5,
+                                    -3
+                                  ],
+                                  [
+                                    -5,
+                                    3
+                                  ],
+                                  [
+                                    -4.9699999999999998,
+                                    3.3500000000000001
+                                  ],
+                                  [
+                                    -4.8799999999999999,
+                                    3.6800000000000002
+                                  ],
+                                  [
+                                    -4.7300000000000004,
+                                    4
+                                  ],
+                                  [
+                                    -4.5300000000000002,
+                                    4.2800000000000002
+                                  ],
+                                  [
+                                    -4.2800000000000002,
+                                    4.5300000000000002
+                                  ],
+                                  [
+                                    -4,
+                                    4.7300000000000004
+                                  ],
+                                  [
+                                    -3.6800000000000002,
+                                    4.8799999999999999
+                                  ],
+                                  [
+                                    -3.3500000000000001,
+                                    4.9699999999999998
+                                  ],
+                                  [
+                                    -3,
+                                    5
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidStroke",
+                                  "enable" : true,
+                                  "capStyle" : "Round",
+                                  "joinStyle" : "Round",
+                                  "lineStyle3D" : "Strip",
+                                  "miterLimit" : 10,
+                                  "width" : 0.25,
+                                  "height3D" : 1,
+                                  "anchor3D" : "Center",
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      0,
+                                      0,
+                                      100
+                                    ]
+                                  }
+                                },
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      115,
+                                      178,
+                                      255,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "scaleSymbolsProportionally" : true,
+                        "respectFrame" : true
+                      }
+                    ],
+                    "haloSize" : 1,
+                    "scaleX" : 1,
+                    "angleAlignment" : "Display"
+                  }
+                },
+                "values" : [
+                  {
+                    "type" : "CIMUniqueValue",
+                    "fieldValues" : [
+                      "1"
+                    ]
+                  }
+                ],
+                "visible" : true
+              },
+              {
+                "type" : "CIMUniqueValueClass",
+                "label" : "PXO",
+                "patch" : "Default",
+                "symbol" : {
+                  "type" : "CIMSymbolReference",
+                  "symbol" : {
+                    "type" : "CIMPointSymbol",
+                    "symbolLayers" : [
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_0b4bc71d-8cf1-4ce4-a4bb-d857497cf449",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : -0.00064500284448562161,
+                          "y" : 6.7984046413016574e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 301,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ]
+                                ],
+                                [
+                                  [
+                                    78,
+                                    -105
+                                  ],
+                                  [
+                                    69,
+                                    -113
+                                  ],
+                                  [
+                                    -69,
+                                    -113
+                                  ],
+                                  [
+                                    -78,
+                                    -105
+                                  ],
+                                  [
+                                    78,
+                                    -105
+                                  ]
+                                ],
+                                [
+                                  [
+                                    150,
+                                    -33
+                                  ],
+                                  [
+                                    141,
+                                    -42
+                                  ],
+                                  [
+                                    56,
+                                    -42
+                                  ],
+                                  [
+                                    54,
+                                    -33
+                                  ],
+                                  [
+                                    150,
+                                    -33
+                                  ]
+                                ],
+                                [
+                                  [
+                                    12,
+                                    -33
+                                  ],
+                                  [
+                                    15,
+                                    -42
+                                  ],
+                                  [
+                                    -7,
+                                    -42
+                                  ],
+                                  [
+                                    -4,
+                                    -33
+                                  ],
+                                  [
+                                    12,
+                                    -33
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -46,
+                                    -33
+                                  ],
+                                  [
+                                    -48,
+                                    -42
+                                  ],
+                                  [
+                                    -141,
+                                    -42
+                                  ],
+                                  [
+                                    -150,
+                                    -33
+                                  ],
+                                  [
+                                    -46,
+                                    -33
+                                  ]
+                                ],
+                                [
+                                  [
+                                    197,
+                                    1
+                                  ],
+                                  [
+                                    197,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    1
+                                  ],
+                                  [
+                                    197,
+                                    1
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -196,
+                                    1
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    1
+                                  ],
+                                  [
+                                    -196,
+                                    1
+                                  ]
+                                ],
+                                [
+                                  [
+                                    1,
+                                    116
+                                  ],
+                                  [
+                                    4,
+                                    115
+                                  ],
+                                  [
+                                    11,
+                                    112
+                                  ],
+                                  [
+                                    25,
+                                    103
+                                  ],
+                                  [
+                                    35,
+                                    99
+                                  ],
+                                  [
+                                    46,
+                                    92
+                                  ],
+                                  [
+                                    56,
+                                    87
+                                  ],
+                                  [
+                                    57,
+                                    86
+                                  ],
+                                  [
+                                    58,
+                                    83
+                                  ],
+                                  [
+                                    59,
+                                    71
+                                  ],
+                                  [
+                                    60,
+                                    53
+                                  ],
+                                  [
+                                    60,
+                                    28
+                                  ],
+                                  [
+                                    59,
+                                    28
+                                  ],
+                                  [
+                                    48,
+                                    29
+                                  ],
+                                  [
+                                    42,
+                                    77
+                                  ],
+                                  [
+                                    29,
+                                    79
+                                  ],
+                                  [
+                                    32,
+                                    65
+                                  ],
+                                  [
+                                    34,
+                                    52
+                                  ],
+                                  [
+                                    35,
+                                    41
+                                  ],
+                                  [
+                                    35,
+                                    33
+                                  ],
+                                  [
+                                    34,
+                                    27
+                                  ],
+                                  [
+                                    35,
+                                    18
+                                  ],
+                                  [
+                                    39,
+                                    -2
+                                  ],
+                                  [
+                                    57,
+                                    -78
+                                  ],
+                                  [
+                                    41,
+                                    -90
+                                  ],
+                                  [
+                                    9,
+                                    0
+                                  ],
+                                  [
+                                    -8,
+                                    -20
+                                  ],
+                                  [
+                                    -30,
+                                    -83
+                                  ],
+                                  [
+                                    -50,
+                                    -75
+                                  ],
+                                  [
+                                    -30,
+                                    -6
+                                  ],
+                                  [
+                                    -4,
+                                    36
+                                  ],
+                                  [
+                                    -14,
+                                    63
+                                  ],
+                                  [
+                                    -25,
+                                    49
+                                  ],
+                                  [
+                                    -64,
+                                    36
+                                  ],
+                                  [
+                                    -72,
+                                    45
+                                  ],
+                                  [
+                                    -31,
+                                    72
+                                  ],
+                                  [
+                                    -29,
+                                    78
+                                  ],
+                                  [
+                                    -23,
+                                    91
+                                  ],
+                                  [
+                                    -17,
+                                    107
+                                  ],
+                                  [
+                                    -14,
+                                    111
+                                  ],
+                                  [
+                                    -12,
+                                    113
+                                  ],
+                                  [
+                                    -6,
+                                    115
+                                  ],
+                                  [
+                                    -3,
+                                    116
+                                  ],
+                                  [
+                                    1,
+                                    116
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -12,
+                                    151
+                                  ],
+                                  [
+                                    -9,
+                                    150
+                                  ],
+                                  [
+                                    -6,
+                                    149
+                                  ],
+                                  [
+                                    -4,
+                                    147
+                                  ],
+                                  [
+                                    -2,
+                                    144
+                                  ],
+                                  [
+                                    0,
+                                    141
+                                  ],
+                                  [
+                                    1,
+                                    138
+                                  ],
+                                  [
+                                    1,
+                                    135
+                                  ],
+                                  [
+                                    1,
+                                    132
+                                  ],
+                                  [
+                                    0,
+                                    129
+                                  ],
+                                  [
+                                    -2,
+                                    126
+                                  ],
+                                  [
+                                    -4,
+                                    123
+                                  ],
+                                  [
+                                    -6,
+                                    121
+                                  ],
+                                  [
+                                    -9,
+                                    120
+                                  ],
+                                  [
+                                    -12,
+                                    119
+                                  ],
+                                  [
+                                    -15,
+                                    118
+                                  ],
+                                  [
+                                    -18,
+                                    119
+                                  ],
+                                  [
+                                    -21,
+                                    120
+                                  ],
+                                  [
+                                    -24,
+                                    121
+                                  ],
+                                  [
+                                    -27,
+                                    123
+                                  ],
+                                  [
+                                    -29,
+                                    126
+                                  ],
+                                  [
+                                    -30,
+                                    129
+                                  ],
+                                  [
+                                    -31,
+                                    132
+                                  ],
+                                  [
+                                    -32,
+                                    135
+                                  ],
+                                  [
+                                    -31,
+                                    138
+                                  ],
+                                  [
+                                    -30,
+                                    141
+                                  ],
+                                  [
+                                    -29,
+                                    144
+                                  ],
+                                  [
+                                    -27,
+                                    147
+                                  ],
+                                  [
+                                    -24,
+                                    149
+                                  ],
+                                  [
+                                    -21,
+                                    150
+                                  ],
+                                  [
+                                    -18,
+                                    151
+                                  ],
+                                  [
+                                    -15,
+                                    151
+                                  ],
+                                  [
+                                    -12,
+                                    151
+                                  ]
+                                ],
+                                [
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      0,
+                                      0,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_57ab4228-f30e-4089-a523-a961b7089998",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : 1.2448250667299966e-08,
+                          "y" : -6.7984046411595499e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    2,
+                                    196
+                                  ],
+                                  [
+                                    4,
+                                    194
+                                  ],
+                                  [
+                                    193,
+                                    5
+                                  ],
+                                  [
+                                    196,
+                                    2
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    -2
+                                  ],
+                                  [
+                                    193,
+                                    -4
+                                  ],
+                                  [
+                                    4,
+                                    -193
+                                  ],
+                                  [
+                                    2,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    -2,
+                                    -196
+                                  ],
+                                  [
+                                    -5,
+                                    -193
+                                  ],
+                                  [
+                                    -194,
+                                    -4
+                                  ],
+                                  [
+                                    -196,
+                                    -2
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    3
+                                  ],
+                                  [
+                                    -194,
+                                    5
+                                  ],
+                                  [
+                                    -5,
+                                    194
+                                  ],
+                                  [
+                                    -3,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    197
+                                  ],
+                                  [
+                                    2,
+                                    196
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      224,
+                                      170,
+                                      15,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_6cd1f355-a642-44f6-8c2b-9a108d0ed28c",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : -6.5942269623064935e-06,
+                          "y" : -6.591812968395061e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    4,
+                                    203
+                                  ],
+                                  [
+                                    10,
+                                    199
+                                  ],
+                                  [
+                                    199,
+                                    10
+                                  ],
+                                  [
+                                    203,
+                                    4
+                                  ],
+                                  [
+                                    204,
+                                    0
+                                  ],
+                                  [
+                                    203,
+                                    -4
+                                  ],
+                                  [
+                                    199,
+                                    -10
+                                  ],
+                                  [
+                                    10,
+                                    -199
+                                  ],
+                                  [
+                                    4,
+                                    -203
+                                  ],
+                                  [
+                                    0,
+                                    -204
+                                  ],
+                                  [
+                                    -4,
+                                    -203
+                                  ],
+                                  [
+                                    -10,
+                                    -199
+                                  ],
+                                  [
+                                    -199,
+                                    -10
+                                  ],
+                                  [
+                                    -203,
+                                    -4
+                                  ],
+                                  [
+                                    -204,
+                                    0
+                                  ],
+                                  [
+                                    -203,
+                                    4
+                                  ],
+                                  [
+                                    -199,
+                                    10
+                                  ],
+                                  [
+                                    -10,
+                                    199
+                                  ],
+                                  [
+                                    -4,
+                                    203
+                                  ],
+                                  [
+                                    0,
+                                    204
+                                  ],
+                                  [
+                                    4,
+                                    203
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      0,
+                                      0,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "anchorPoint" : {
+                          "x" : 0.00062209943066801881,
+                          "y" : 0
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -301,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    3,
+                                    210
+                                  ],
+                                  [
+                                    6,
+                                    208
+                                  ],
+                                  [
+                                    10,
+                                    206
+                                  ],
+                                  [
+                                    14,
+                                    203
+                                  ],
+                                  [
+                                    96,
+                                    121
+                                  ],
+                                  [
+                                    151,
+                                    65
+                                  ],
+                                  [
+                                    185,
+                                    31
+                                  ],
+                                  [
+                                    202,
+                                    12
+                                  ],
+                                  [
+                                    207,
+                                    6
+                                  ],
+                                  [
+                                    209,
+                                    3
+                                  ],
+                                  [
+                                    210,
+                                    0
+                                  ],
+                                  [
+                                    210,
+                                    -3
+                                  ],
+                                  [
+                                    208,
+                                    -7
+                                  ],
+                                  [
+                                    206,
+                                    -10
+                                  ],
+                                  [
+                                    203,
+                                    -14
+                                  ],
+                                  [
+                                    13,
+                                    -203
+                                  ],
+                                  [
+                                    6,
+                                    -208
+                                  ],
+                                  [
+                                    2,
+                                    -210
+                                  ],
+                                  [
+                                    -1,
+                                    -210
+                                  ],
+                                  [
+                                    -3,
+                                    -210
+                                  ],
+                                  [
+                                    -7,
+                                    -208
+                                  ],
+                                  [
+                                    -14,
+                                    -203
+                                  ],
+                                  [
+                                    -204,
+                                    -14
+                                  ],
+                                  [
+                                    -209,
+                                    -6
+                                  ],
+                                  [
+                                    -210,
+                                    -3
+                                  ],
+                                  [
+                                    -211,
+                                    0
+                                  ],
+                                  [
+                                    -210,
+                                    3
+                                  ],
+                                  [
+                                    -209,
+                                    6
+                                  ],
+                                  [
+                                    -204,
+                                    14
+                                  ],
+                                  [
+                                    -14,
+                                    203
+                                  ],
+                                  [
+                                    -7,
+                                    208
+                                  ],
+                                  [
+                                    -3,
+                                    210
+                                  ],
+                                  [
+                                    -1,
+                                    210
+                                  ],
+                                  [
+                                    3,
+                                    210
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      224,
+                                      170,
+                                      15,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      }
+                    ],
+                    "haloSize" : 1,
+                    "scaleX" : 1,
+                    "angleAlignment" : "Display"
+                  }
+                },
+                "values" : [
+                  {
+                    "type" : "CIMUniqueValue",
+                    "fieldValues" : [
+                      "2"
+                    ]
+                  }
+                ],
+                "visible" : true
+              },
+              {
+                "type" : "CIMUniqueValueClass",
+                "label" : "TRAFFIC SIGNAL",
+                "patch" : "Default",
+                "symbol" : {
+                  "type" : "CIMSymbolReference",
+                  "symbol" : {
+                    "type" : "CIMPointSymbol",
+                    "symbolLayers" : [
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_af0c4401-ff80-4570-914f-70e1df6cf394",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : 1.2448250667299966e-08,
+                          "y" : 6.7984046413016574e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ]
+                                ],
+                                [
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    7,
+                                    113
+                                  ],
+                                  [
+                                    13,
+                                    111
+                                  ],
+                                  [
+                                    19,
+                                    108
+                                  ],
+                                  [
+                                    24,
+                                    103
+                                  ],
+                                  [
+                                    28,
+                                    98
+                                  ],
+                                  [
+                                    31,
+                                    93
+                                  ],
+                                  [
+                                    33,
+                                    87
+                                  ],
+                                  [
+                                    34,
+                                    80
+                                  ],
+                                  [
+                                    33,
+                                    74
+                                  ],
+                                  [
+                                    31,
+                                    68
+                                  ],
+                                  [
+                                    28,
+                                    62
+                                  ],
+                                  [
+                                    24,
+                                    57
+                                  ],
+                                  [
+                                    19,
+                                    53
+                                  ],
+                                  [
+                                    13,
+                                    50
+                                  ],
+                                  [
+                                    7,
+                                    48
+                                  ],
+                                  [
+                                    0,
+                                    48
+                                  ],
+                                  [
+                                    -6,
+                                    48
+                                  ],
+                                  [
+                                    -12,
+                                    50
+                                  ],
+                                  [
+                                    -18,
+                                    53
+                                  ],
+                                  [
+                                    -23,
+                                    57
+                                  ],
+                                  [
+                                    -27,
+                                    62
+                                  ],
+                                  [
+                                    -30,
+                                    68
+                                  ],
+                                  [
+                                    -32,
+                                    74
+                                  ],
+                                  [
+                                    -33,
+                                    80
+                                  ],
+                                  [
+                                    -32,
+                                    87
+                                  ],
+                                  [
+                                    -30,
+                                    93
+                                  ],
+                                  [
+                                    -27,
+                                    98
+                                  ],
+                                  [
+                                    -23,
+                                    103
+                                  ],
+                                  [
+                                    -18,
+                                    108
+                                  ],
+                                  [
+                                    -12,
+                                    111
+                                  ],
+                                  [
+                                    -6,
+                                    113
+                                  ],
+                                  [
+                                    0,
+                                    113
+                                  ],
+                                  [
+                                    7,
+                                    113
+                                  ]
+                                ],
+                                [
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      205,
+                                      46,
+                                      49,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_02cfb1c8-2d0c-419b-a0d9-7b51a1a6b950",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : 1.2448250667299966e-08,
+                          "y" : 6.7984046413016574e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ]
+                                ],
+                                [
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    7,
+                                    32
+                                  ],
+                                  [
+                                    13,
+                                    30
+                                  ],
+                                  [
+                                    19,
+                                    27
+                                  ],
+                                  [
+                                    24,
+                                    23
+                                  ],
+                                  [
+                                    28,
+                                    18
+                                  ],
+                                  [
+                                    31,
+                                    12
+                                  ],
+                                  [
+                                    33,
+                                    6
+                                  ],
+                                  [
+                                    34,
+                                    0
+                                  ],
+                                  [
+                                    33,
+                                    -7
+                                  ],
+                                  [
+                                    31,
+                                    -13
+                                  ],
+                                  [
+                                    28,
+                                    -19
+                                  ],
+                                  [
+                                    24,
+                                    -24
+                                  ],
+                                  [
+                                    19,
+                                    -28
+                                  ],
+                                  [
+                                    13,
+                                    -31
+                                  ],
+                                  [
+                                    7,
+                                    -33
+                                  ],
+                                  [
+                                    0,
+                                    -34
+                                  ],
+                                  [
+                                    -6,
+                                    -33
+                                  ],
+                                  [
+                                    -12,
+                                    -31
+                                  ],
+                                  [
+                                    -18,
+                                    -28
+                                  ],
+                                  [
+                                    -23,
+                                    -24
+                                  ],
+                                  [
+                                    -27,
+                                    -19
+                                  ],
+                                  [
+                                    -30,
+                                    -13
+                                  ],
+                                  [
+                                    -32,
+                                    -7
+                                  ],
+                                  [
+                                    -33,
+                                    0
+                                  ],
+                                  [
+                                    -32,
+                                    6
+                                  ],
+                                  [
+                                    -30,
+                                    12
+                                  ],
+                                  [
+                                    -27,
+                                    18
+                                  ],
+                                  [
+                                    -23,
+                                    23
+                                  ],
+                                  [
+                                    -18,
+                                    27
+                                  ],
+                                  [
+                                    -12,
+                                    30
+                                  ],
+                                  [
+                                    -6,
+                                    32
+                                  ],
+                                  [
+                                    0,
+                                    33
+                                  ],
+                                  [
+                                    7,
+                                    32
+                                  ]
+                                ],
+                                [
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      224,
+                                      170,
+                                      15,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_e21dbe99-885a-482b-805a-7d3d0d0bf517",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : 1.2448250667299966e-08,
+                          "y" : 6.7984046413016574e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -197
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ]
+                                ],
+                                [
+                                  [
+                                    7,
+                                    -49
+                                  ],
+                                  [
+                                    13,
+                                    -51
+                                  ],
+                                  [
+                                    19,
+                                    -54
+                                  ],
+                                  [
+                                    24,
+                                    -58
+                                  ],
+                                  [
+                                    28,
+                                    -63
+                                  ],
+                                  [
+                                    31,
+                                    -69
+                                  ],
+                                  [
+                                    33,
+                                    -75
+                                  ],
+                                  [
+                                    34,
+                                    -81
+                                  ],
+                                  [
+                                    33,
+                                    -88
+                                  ],
+                                  [
+                                    31,
+                                    -94
+                                  ],
+                                  [
+                                    28,
+                                    -100
+                                  ],
+                                  [
+                                    24,
+                                    -105
+                                  ],
+                                  [
+                                    19,
+                                    -109
+                                  ],
+                                  [
+                                    13,
+                                    -112
+                                  ],
+                                  [
+                                    7,
+                                    -114
+                                  ],
+                                  [
+                                    0,
+                                    -114
+                                  ],
+                                  [
+                                    -6,
+                                    -114
+                                  ],
+                                  [
+                                    -12,
+                                    -112
+                                  ],
+                                  [
+                                    -18,
+                                    -109
+                                  ],
+                                  [
+                                    -23,
+                                    -105
+                                  ],
+                                  [
+                                    -27,
+                                    -100
+                                  ],
+                                  [
+                                    -30,
+                                    -94
+                                  ],
+                                  [
+                                    -32,
+                                    -88
+                                  ],
+                                  [
+                                    -33,
+                                    -81
+                                  ],
+                                  [
+                                    -32,
+                                    -75
+                                  ],
+                                  [
+                                    -30,
+                                    -69
+                                  ],
+                                  [
+                                    -27,
+                                    -63
+                                  ],
+                                  [
+                                    -23,
+                                    -58
+                                  ],
+                                  [
+                                    -18,
+                                    -54
+                                  ],
+                                  [
+                                    -12,
+                                    -51
+                                  ],
+                                  [
+                                    -6,
+                                    -49
+                                  ],
+                                  [
+                                    0,
+                                    -49
+                                  ],
+                                  [
+                                    7,
+                                    -49
+                                  ]
+                                ],
+                                [
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      123,
+                                      95,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_504f653c-094d-4ab9-a1d5-a580c00ba05a",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : 1.2448250667299966e-08,
+                          "y" : -6.7984046411595499e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -6,
+                                    -49
+                                  ],
+                                  [
+                                    -12,
+                                    -51
+                                  ],
+                                  [
+                                    -18,
+                                    -54
+                                  ],
+                                  [
+                                    -23,
+                                    -58
+                                  ],
+                                  [
+                                    -27,
+                                    -63
+                                  ],
+                                  [
+                                    -30,
+                                    -68
+                                  ],
+                                  [
+                                    -32,
+                                    -74
+                                  ],
+                                  [
+                                    -33,
+                                    -81
+                                  ],
+                                  [
+                                    -32,
+                                    -87
+                                  ],
+                                  [
+                                    -30,
+                                    -93
+                                  ],
+                                  [
+                                    -27,
+                                    -99
+                                  ],
+                                  [
+                                    -23,
+                                    -104
+                                  ],
+                                  [
+                                    -18,
+                                    -108
+                                  ],
+                                  [
+                                    -12,
+                                    -111
+                                  ],
+                                  [
+                                    -6,
+                                    -113
+                                  ],
+                                  [
+                                    0,
+                                    -114
+                                  ],
+                                  [
+                                    7,
+                                    -113
+                                  ],
+                                  [
+                                    13,
+                                    -111
+                                  ],
+                                  [
+                                    19,
+                                    -108
+                                  ],
+                                  [
+                                    24,
+                                    -104
+                                  ],
+                                  [
+                                    28,
+                                    -99
+                                  ],
+                                  [
+                                    31,
+                                    -93
+                                  ],
+                                  [
+                                    33,
+                                    -87
+                                  ],
+                                  [
+                                    34,
+                                    -81
+                                  ],
+                                  [
+                                    33,
+                                    -74
+                                  ],
+                                  [
+                                    31,
+                                    -68
+                                  ],
+                                  [
+                                    28,
+                                    -63
+                                  ],
+                                  [
+                                    24,
+                                    -58
+                                  ],
+                                  [
+                                    19,
+                                    -54
+                                  ],
+                                  [
+                                    13,
+                                    -51
+                                  ],
+                                  [
+                                    7,
+                                    -49
+                                  ],
+                                  [
+                                    0,
+                                    -48
+                                  ],
+                                  [
+                                    -6,
+                                    -49
+                                  ]
+                                ],
+                                [
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    0
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -6,
+                                    33
+                                  ],
+                                  [
+                                    -12,
+                                    31
+                                  ],
+                                  [
+                                    -18,
+                                    28
+                                  ],
+                                  [
+                                    -23,
+                                    24
+                                  ],
+                                  [
+                                    -27,
+                                    19
+                                  ],
+                                  [
+                                    -30,
+                                    13
+                                  ],
+                                  [
+                                    -32,
+                                    7
+                                  ],
+                                  [
+                                    -33,
+                                    0
+                                  ],
+                                  [
+                                    -32,
+                                    -6
+                                  ],
+                                  [
+                                    -30,
+                                    -13
+                                  ],
+                                  [
+                                    -27,
+                                    -18
+                                  ],
+                                  [
+                                    -23,
+                                    -23
+                                  ],
+                                  [
+                                    -18,
+                                    -28
+                                  ],
+                                  [
+                                    -12,
+                                    -31
+                                  ],
+                                  [
+                                    -6,
+                                    -33
+                                  ],
+                                  [
+                                    0,
+                                    -33
+                                  ],
+                                  [
+                                    7,
+                                    -33
+                                  ],
+                                  [
+                                    13,
+                                    -31
+                                  ],
+                                  [
+                                    19,
+                                    -28
+                                  ],
+                                  [
+                                    24,
+                                    -23
+                                  ],
+                                  [
+                                    28,
+                                    -18
+                                  ],
+                                  [
+                                    31,
+                                    -13
+                                  ],
+                                  [
+                                    33,
+                                    -6
+                                  ],
+                                  [
+                                    34,
+                                    0
+                                  ],
+                                  [
+                                    33,
+                                    7
+                                  ],
+                                  [
+                                    31,
+                                    13
+                                  ],
+                                  [
+                                    28,
+                                    19
+                                  ],
+                                  [
+                                    24,
+                                    24
+                                  ],
+                                  [
+                                    19,
+                                    28
+                                  ],
+                                  [
+                                    13,
+                                    31
+                                  ],
+                                  [
+                                    7,
+                                    33
+                                  ],
+                                  [
+                                    0,
+                                    33
+                                  ],
+                                  [
+                                    -6,
+                                    33
+                                  ]
+                                ],
+                                [
+                                  [
+                                    -6,
+                                    113
+                                  ],
+                                  [
+                                    -12,
+                                    111
+                                  ],
+                                  [
+                                    -18,
+                                    108
+                                  ],
+                                  [
+                                    -23,
+                                    104
+                                  ],
+                                  [
+                                    -27,
+                                    99
+                                  ],
+                                  [
+                                    -30,
+                                    93
+                                  ],
+                                  [
+                                    -32,
+                                    87
+                                  ],
+                                  [
+                                    -33,
+                                    81
+                                  ],
+                                  [
+                                    -32,
+                                    74
+                                  ],
+                                  [
+                                    -30,
+                                    68
+                                  ],
+                                  [
+                                    -27,
+                                    63
+                                  ],
+                                  [
+                                    -23,
+                                    58
+                                  ],
+                                  [
+                                    -18,
+                                    54
+                                  ],
+                                  [
+                                    -12,
+                                    51
+                                  ],
+                                  [
+                                    -6,
+                                    49
+                                  ],
+                                  [
+                                    0,
+                                    48
+                                  ],
+                                  [
+                                    7,
+                                    49
+                                  ],
+                                  [
+                                    13,
+                                    51
+                                  ],
+                                  [
+                                    19,
+                                    54
+                                  ],
+                                  [
+                                    24,
+                                    58
+                                  ],
+                                  [
+                                    28,
+                                    63
+                                  ],
+                                  [
+                                    31,
+                                    68
+                                  ],
+                                  [
+                                    33,
+                                    74
+                                  ],
+                                  [
+                                    34,
+                                    81
+                                  ],
+                                  [
+                                    33,
+                                    87
+                                  ],
+                                  [
+                                    31,
+                                    93
+                                  ],
+                                  [
+                                    28,
+                                    99
+                                  ],
+                                  [
+                                    24,
+                                    104
+                                  ],
+                                  [
+                                    19,
+                                    108
+                                  ],
+                                  [
+                                    13,
+                                    111
+                                  ],
+                                  [
+                                    7,
+                                    113
+                                  ],
+                                  [
+                                    0,
+                                    114
+                                  ],
+                                  [
+                                    -6,
+                                    113
+                                  ]
+                                ],
+                                [
+                                  [
+                                    48,
+                                    130
+                                  ],
+                                  [
+                                    48,
+                                    -129
+                                  ],
+                                  [
+                                    -47,
+                                    -129
+                                  ],
+                                  [
+                                    -47,
+                                    130
+                                  ],
+                                  [
+                                    48,
+                                    130
+                                  ]
+                                ],
+                                [
+                                  [
+                                    0,
+                                    197
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    197
+                                  ],
+                                  [
+                                    0,
+                                    197
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      0,
+                                      0,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_cd627062-30a0-4f07-be12-f5f16ffdf6be",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : 1.2448250667299966e-08,
+                          "y" : -6.7984046411595499e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    2,
+                                    196
+                                  ],
+                                  [
+                                    4,
+                                    194
+                                  ],
+                                  [
+                                    193,
+                                    5
+                                  ],
+                                  [
+                                    196,
+                                    2
+                                  ],
+                                  [
+                                    196,
+                                    0
+                                  ],
+                                  [
+                                    196,
+                                    -2
+                                  ],
+                                  [
+                                    193,
+                                    -4
+                                  ],
+                                  [
+                                    4,
+                                    -193
+                                  ],
+                                  [
+                                    2,
+                                    -196
+                                  ],
+                                  [
+                                    0,
+                                    -196
+                                  ],
+                                  [
+                                    -2,
+                                    -196
+                                  ],
+                                  [
+                                    -5,
+                                    -193
+                                  ],
+                                  [
+                                    -194,
+                                    -4
+                                  ],
+                                  [
+                                    -196,
+                                    -2
+                                  ],
+                                  [
+                                    -197,
+                                    0
+                                  ],
+                                  [
+                                    -196,
+                                    3
+                                  ],
+                                  [
+                                    -194,
+                                    5
+                                  ],
+                                  [
+                                    -5,
+                                    194
+                                  ],
+                                  [
+                                    -3,
+                                    196
+                                  ],
+                                  [
+                                    0,
+                                    197
+                                  ],
+                                  [
+                                    2,
+                                    196
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      224,
+                                      170,
+                                      15,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "name" : "New_a6d7dffc-79fe-4fe1-8078-9e3800dc8039",
+                        "colorLocked" : true,
+                        "anchorPoint" : {
+                          "x" : -6.5942269623064935e-06,
+                          "y" : -6.591812968395061e-06
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -300,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    4,
+                                    203
+                                  ],
+                                  [
+                                    10,
+                                    199
+                                  ],
+                                  [
+                                    199,
+                                    10
+                                  ],
+                                  [
+                                    203,
+                                    4
+                                  ],
+                                  [
+                                    204,
+                                    0
+                                  ],
+                                  [
+                                    203,
+                                    -4
+                                  ],
+                                  [
+                                    199,
+                                    -10
+                                  ],
+                                  [
+                                    10,
+                                    -199
+                                  ],
+                                  [
+                                    4,
+                                    -203
+                                  ],
+                                  [
+                                    0,
+                                    -204
+                                  ],
+                                  [
+                                    -4,
+                                    -203
+                                  ],
+                                  [
+                                    -10,
+                                    -199
+                                  ],
+                                  [
+                                    -199,
+                                    -10
+                                  ],
+                                  [
+                                    -203,
+                                    -4
+                                  ],
+                                  [
+                                    -204,
+                                    0
+                                  ],
+                                  [
+                                    -203,
+                                    4
+                                  ],
+                                  [
+                                    -199,
+                                    10
+                                  ],
+                                  [
+                                    -10,
+                                    199
+                                  ],
+                                  [
+                                    -4,
+                                    203
+                                  ],
+                                  [
+                                    0,
+                                    204
+                                  ],
+                                  [
+                                    4,
+                                    203
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      0,
+                                      0,
+                                      0,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      },
+                      {
+                        "type" : "CIMVectorMarker",
+                        "enable" : true,
+                        "anchorPoint" : {
+                          "x" : 0.00062209943066801881,
+                          "y" : 0
+                        },
+                        "anchorPointUnits" : "Relative",
+                        "dominantSizeAxis3D" : "Y",
+                        "size" : 18,
+                        "billboardMode3D" : "FaceNearPlane",
+                        "frame" : {
+                          "xmin" : -301,
+                          "ymin" : -300,
+                          "xmax" : 300,
+                          "ymax" : 300
+                        },
+                        "markerGraphics" : [
+                          {
+                            "type" : "CIMMarkerGraphic",
+                            "geometry" : {
+                              "rings" : [
+                                [
+                                  [
+                                    3,
+                                    210
+                                  ],
+                                  [
+                                    6,
+                                    208
+                                  ],
+                                  [
+                                    10,
+                                    206
+                                  ],
+                                  [
+                                    14,
+                                    203
+                                  ],
+                                  [
+                                    96,
+                                    121
+                                  ],
+                                  [
+                                    151,
+                                    65
+                                  ],
+                                  [
+                                    185,
+                                    31
+                                  ],
+                                  [
+                                    202,
+                                    12
+                                  ],
+                                  [
+                                    207,
+                                    6
+                                  ],
+                                  [
+                                    209,
+                                    3
+                                  ],
+                                  [
+                                    210,
+                                    0
+                                  ],
+                                  [
+                                    210,
+                                    -3
+                                  ],
+                                  [
+                                    208,
+                                    -7
+                                  ],
+                                  [
+                                    206,
+                                    -10
+                                  ],
+                                  [
+                                    203,
+                                    -14
+                                  ],
+                                  [
+                                    13,
+                                    -203
+                                  ],
+                                  [
+                                    6,
+                                    -208
+                                  ],
+                                  [
+                                    2,
+                                    -210
+                                  ],
+                                  [
+                                    -1,
+                                    -210
+                                  ],
+                                  [
+                                    -3,
+                                    -210
+                                  ],
+                                  [
+                                    -7,
+                                    -208
+                                  ],
+                                  [
+                                    -14,
+                                    -203
+                                  ],
+                                  [
+                                    -204,
+                                    -14
+                                  ],
+                                  [
+                                    -209,
+                                    -6
+                                  ],
+                                  [
+                                    -210,
+                                    -3
+                                  ],
+                                  [
+                                    -211,
+                                    0
+                                  ],
+                                  [
+                                    -210,
+                                    3
+                                  ],
+                                  [
+                                    -209,
+                                    6
+                                  ],
+                                  [
+                                    -204,
+                                    14
+                                  ],
+                                  [
+                                    -14,
+                                    203
+                                  ],
+                                  [
+                                    -7,
+                                    208
+                                  ],
+                                  [
+                                    -3,
+                                    210
+                                  ],
+                                  [
+                                    -1,
+                                    210
+                                  ],
+                                  [
+                                    3,
+                                    210
+                                  ]
+                                ]
+                              ]
+                            },
+                            "symbol" : {
+                              "type" : "CIMPolygonSymbol",
+                              "symbolLayers" : [
+                                {
+                                  "type" : "CIMSolidFill",
+                                  "enable" : true,
+                                  "color" : {
+                                    "type" : "CIMRGBColor",
+                                    "values" : [
+                                      224,
+                                      170,
+                                      15,
+                                      100
+                                    ]
+                                  }
+                                }
+                              ],
+                              "angleAlignment" : "Map"
+                            }
+                          }
+                        ],
+                        "respectFrame" : true
+                      }
+                    ],
+                    "haloSize" : 1,
+                    "scaleX" : 1,
+                    "angleAlignment" : "Display"
+                  }
+                },
+                "values" : [
+                  {
+                    "type" : "CIMUniqueValue",
+                    "fieldValues" : [
+                      "3"
+                    ]
+                  }
+                ],
+                "visible" : true
+              }
+            ],
+            "heading" : "TSBSPXO"
+          }
+        ],
+        "useDefaultSymbol" : true,
+        "isDefaultSymbolVisible" : true,
+        "polygonSymbolColorTarget" : "Fill"
+      },
+      "scaleSymbols" : true,
+      "snappable" : true
+    }
+  ],
+  "rGBColorProfile" : "sRGB IEC61966-2.1",
+  "cMYKColorProfile" : "U.S. Web Coated (SWOP) v2",
+  "elevationSurfaceLayerDefinitions" : [
+    {
+      "type" : "CIMElevationSurfaceLayer",
+      "name" : "Ground",
+      "uRI" : "CIMPATH=Map/278606edd41e40059da631e486370b87.json",
+      "sourceModifiedTime" : {
+        "type" : "TimeInstant"
+      },
+      "useSourceMetadata" : true,
+      "description" : "Ground",
+      "expanded" : true,
+      "layer3DProperties" : {
+        "type" : "CIM3DLayerProperties",
+        "castShadows" : true,
+        "isLayerLit" : true,
+        "layerFaceCulling" : "None",
+        "preloadTextureCutoffHigh" : 0.29999999999999999,
+        "preloadTextureCutoffLow" : 0.59999999999999998,
+        "textureCutoffHigh" : 0.29999999999999999,
+        "textureCutoffLow" : 0.59999999999999998,
+        "useCompressedTextures" : true,
+        "verticalExaggeration" : 1,
+        "exaggerationMode" : "ScaleZ",
+        "lighting" : "OneSideDataNormal",
+        "optimizeMarkerTransparency" : true
+      },
+      "layerType" : "Operational",
+      "showLegends" : false,
+      "visibility" : true,
+      "displayCacheType" : "Permanent",
+      "maxDisplayCacheAge" : 5,
+      "showPopups" : true,
+      "serviceLayerID" : -1,
+      "refreshRate" : -1,
+      "refreshRateUnit" : "esriTimeUnitsSeconds",
+      "blendingMode" : "Alpha",
+      "allowDrapingOnIntegratedMesh" : true,
+      "elevationMode" : "BaseGlobeSurface",
+      "verticalExaggeration" : 1,
+      "color" : {
+        "type" : "CIMRGBColor",
+        "values" : [
+          255,
+          255,
+          255,
+          100
+        ]
+      },
+      "surfaceTINShadingMode" : "Smooth"
+    }
+  ]
+}
