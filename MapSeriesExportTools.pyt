@@ -198,11 +198,22 @@ MIN_FRAME_SPAN_M = 300.0
 # the sidewalk, ~10-25 m off the centreline on wide arterials)
 BPX_STREET_SEARCH_M = 40
 
+# DLA (per Ramon 2026-10-13): route coloured by number of passes - 1 pass
+# red, 2 passes green - and a Beat Stats table of KMS by passes. dla_kms is
+# already pass-weighted (2-pass segment = 2 x its length).
+DLA_PASS_FIELD = "dla_pass"
+DLA_PASS_SYMBOLOGY = {
+    "1": {"label": "1 Pass",   "color": [255, 0, 0, 100], "width": 2},
+    "2": {"label": "2 Passes", "color": [0, 168, 0, 100], "width": 2},
+}
+BEAT_STATS_DLA_TABLE_NAME = "MapSeriesExport_BeatStats_DLA_v1"
+DLA_LEGEND_LAYER_NAME_PREFIX = "DLA Legend"
+
 # layers this tool adds itself - never auto-detected as fit layers, and
 # cleaned up at the start of a run if an earlier run left one behind
 TOOL_LAYER_NAME_PREFIXES = ((ROUTE_HIGHLIGHT_LAYER_NAME_PREFIX, SIDEWALK_LEGEND_LAYER_NAME_PREFIX)
                             + tuple(s["label"] for s in ROUTE_STYLE_BY_ACTIVITY.values())
-                            + (BPX_LEGEND_LAYER_NAME_PREFIX,))
+                            + (BPX_LEGEND_LAYER_NAME_PREFIX, DLA_LEGEND_LAYER_NAME_PREFIX))
 
 TITLE_TEXT_BY_ACTIVITY = {
     "Salt/Plow":            "SALT & PLOW",
@@ -928,7 +939,7 @@ class ExportBeatMapSeries(object):
 
     def _swap_in_beat_only_layers(self, mf, fit_layers, beat_field, beat_text, scratch_gdb, ref_label_classes,
                                    messages, hide_original=True, highlight_style=None, roadclass_field=None,
-                                   ref_renderer=None, bpx_points=False):
+                                   ref_renderer=None, bpx_points=False, dla_passes=False):
         """Show this beat's features on the map: extract them to a fresh,
         real (not in_memory - addDataFromPath doesn't handle that reliably)
         feature class, add it, apply labels, and swap it in - torn down and
@@ -1001,6 +1012,13 @@ class ExportBeatMapSeries(object):
                 elif bpx_points:
                     # BPX: this beat's ACTIVE points, one symbol per type
                     self._apply_bpx_symbology(new_lyr)
+                elif dla_passes:
+                    # DLA: 1 pass red / 2 passes green
+                    self._apply_dla_symbology(new_lyr)
+                    try:
+                        mf.map.moveLayer(lyr, new_lyr, "BEFORE")
+                    except Exception:
+                        pass
                 elif ref_renderer:
                     # Sidewalk mode: (renderer CIM, field candidates) copied
                     # from the Sidewalks map's reference layer
@@ -1165,6 +1183,10 @@ class ExportBeatMapSeries(object):
                         for lc in cim.labelClasses or []:
                             lc.whereClause = self._and_where(lc.whereClause, exclude) or ""
                         new_lyr.setDefinition(cim)
+                    if self._activity == "DLA":
+                        # DLA: local roads with no DLA beat aren't serviced -
+                        # leave them unlabeled (per Ramon 2026-10-13)
+                        self._skip_unserviced_local_labels(new_lyr, fields)
                 new_lyr.visible = True
                 # under the beat route
                 if beat_layer_records:
@@ -1178,6 +1200,21 @@ class ExportBeatMapSeries(object):
                 if arcpy.Exists(out_fc):
                     arcpy.management.Delete(out_fc)
         return records
+
+    @staticmethod
+    def _skip_unserviced_local_labels(new_lyr, fields):
+        """Background labels: drop local (LOC) roads with no DLA beat. Set
+        once on the fresh per-page layer, never re-edited."""
+        rc_f = next((fields[c.lower()] for c in LABEL_ROADCLASS_FIELD_CANDIDATES if c.lower() in fields), None)
+        beat_f = next((fields[c.lower()] for c in BEAT_FIELD_CANDIDATES["DLA"] if c.lower() in fields), None)
+        if not rc_f or not beat_f:
+            return
+        blanks = ", ".join(f"'{v}'" for v in sorted(BLANK_FILTER_VALUES))
+        keep = f"({rc_f} IS NULL OR {rc_f} <> 'LOC' OR ({beat_f} IS NOT NULL AND {beat_f} NOT IN ({blanks})))"
+        cim = new_lyr.getDefinition("V3")
+        for lc in cim.labelClasses or []:
+            lc.whereClause = ExportBeatMapSeries._and_where(lc.whereClause, keep) or ""
+        new_lyr.setDefinition(cim)
 
     @staticmethod
     def _norm_street(name):
@@ -1358,6 +1395,77 @@ class ExportBeatMapSeries(object):
         new_lyr.visible = False
         messages.addMessage(f"Built route legend reference layer '{new_lyr.name}'.")
         return new_lyr, out_fc
+
+    # ---------------- DLA (passes) ----------------
+    @staticmethod
+    def _apply_dla_symbology(lyr):
+        """Line coloured by dla_pass (DLA_PASS_SYMBOLOGY) via the symbology
+        API on a fresh layer - same pattern as _apply_roadclass_symbology,
+        proven live. Other pass values (a few 0s) get no class."""
+        sym = lyr.symbology
+        sym.updateRenderer("UniqueValueRenderer")
+        sym.renderer.fields = [ExportBeatMapSeries._layer_fields(lyr).get(DLA_PASS_FIELD, DLA_PASS_FIELD)]
+        for g in sym.renderer.groups:
+            for it in g.items:
+                style = DLA_PASS_SYMBOLOGY.get(str(it.values[0][0]))
+                if not style:
+                    continue
+                it.symbol.color = {"RGB": style["color"]}
+                it.symbol.size = style["width"]
+                it.label = style["label"]
+        lyr.symbology = sym
+
+    def _setup_dla_legend_reference(self, mf, fit_layers, layout_label, messages):
+        """Hidden helper so the legend shows just "1 Pass" / "2 Passes"."""
+        lyr = fit_layers[0]
+        fld = arcpy.AddFieldDelimiters(lyr, self._layer_fields(lyr).get(DLA_PASS_FIELD, DLA_PASS_FIELD))
+        codes = ", ".join(DLA_PASS_SYMBOLOGY)
+        out_fc = arcpy.CreateUniqueName("dla_legend_ref", arcpy.env.scratchGDB)
+        arcpy.analysis.Select(lyr, out_fc, f"{fld} IN ({codes})")
+        new_lyr = mf.map.addDataFromPath(out_fc)
+        new_lyr.name = f"{DLA_LEGEND_LAYER_NAME_PREFIX} ({layout_label})"
+        self._apply_dla_symbology(new_lyr)
+        new_lyr.visible = False
+        messages.addMessage(f"Built DLA legend reference layer '{new_lyr.name}'.")
+        return new_lyr, out_fc
+
+    def _rebuild_dla_stats_table(self, layout, mf, fit_layers, beat_field, kms_field, default_gdb, messages):
+        """Beat Stats for DLA: one row per beat per number of passes,
+        BEAT | PASSES | KMS (dla_kms summed - already pass-weighted). Fixed
+        schema, rows replaced each run (schema-lock lesson)."""
+        el = self._find_table_frame(layout, "Beat Stats Table")
+        if not el:
+            return
+        out_path = os.path.join(default_gdb, BEAT_STATS_DLA_TABLE_NAME)
+        if not arcpy.Exists(out_path):
+            gdb, name = os.path.split(out_path)
+            arcpy.management.CreateTable(gdb, name)
+            arcpy.management.AddField(out_path, "BEAT", "TEXT", field_length=255, field_alias="BEAT")
+            arcpy.management.AddField(out_path, "PASSES", "SHORT", field_alias="PASSES")
+            arcpy.management.AddField(out_path, "KMS", "DOUBLE", field_alias="KMS")
+        totals = {}
+        for lyr in fit_layers:
+            f = self._layer_fields(lyr)
+            if beat_field.lower() not in f or DLA_PASS_FIELD not in f:
+                continue
+            cols = [f[beat_field.lower()], f[DLA_PASS_FIELD]] + ([f[kms_field.lower()]] if kms_field and kms_field.lower() in f else [])
+            with arcpy.da.SearchCursor(lyr, cols) as cur:
+                for row in cur:
+                    b = str(row[0]).strip() if row[0] is not None else ""
+                    p = row[1]
+                    if b.upper() in BLANK_FILTER_VALUES or p is None or str(p) not in DLA_PASS_SYMBOLOGY:
+                        continue
+                    k = (row[2] or 0) if len(row) > 2 else 0
+                    totals[(b, int(p))] = totals.get((b, int(p)), 0) + k
+        arcpy.management.DeleteRows(out_path)
+        with arcpy.da.InsertCursor(out_path, ["BEAT", "PASSES", "KMS"]) as icur:
+            for (b, p) in sorted(totals):
+                icur.insertRow((b, p, round(totals[(b, p)], 2)))
+        tbl = self._ensure_table_in_map(mf.map, out_path, BEAT_STATS_DLA_TABLE_NAME)
+        el.table = tbl
+        self._set_table_fields(el, ["BEAT", "PASSES", "KMS"])
+        el.visible = True
+        messages.addMessage(f"Beat Stats Table: DLA KMS by passes for {len({b for b, _ in totals})} beat(s).")
 
     # ---------------- BPX (TS_BS_PXO points) ----------------
     @staticmethod
@@ -1558,6 +1666,22 @@ class ExportBeatMapSeries(object):
     def _set_beat_label_text(self, beat_label_elements, beat_text):
         for el in beat_label_elements:
             el.text = beat_text
+            # Portrait's BEAT NAME was saved hidden (found 2026-10-13)
+            el.visible = True
+
+    @staticmethod
+    def _right_align_beat_label(layout, mf, beat_label_elements):
+        """Portrait: beat name on the title's line, its right edge just
+        inside the map frame's right edge. The old spot above the North
+        Arrow was 1.2" wide and long names ran past the border
+        (BPX1110, 2026-10-13)."""
+        title = next((e for e in layout.listElements("TEXT_ELEMENT")
+                      if e.name.upper() in ("MAP TITLE", "MAP NAME")), None)
+        right = mf.elementPositionX + mf.elementWidth - 0.15
+        for el in beat_label_elements:
+            el.elementPositionX = right - el.elementWidth
+            if title:
+                el.elementPositionY = title.elementPositionY
 
     def _position_beat_labels_above_north_arrow(self, layout, beat_label_elements, messages):
         north = next((e for e in layout.listElements() if e.name == "North Arrow"), None)
@@ -2230,11 +2354,10 @@ class ExportBeatMapSeries(object):
 
         beat_label_els_L = self._find_beat_label_elements(layoutL)
         beat_label_els_P = self._find_beat_label_elements(layoutP) if layoutP else beat_label_els_L
-        # Landscape's "BEAT NAME" element is now manually positioned in the
-        # layout itself - leave it alone. Portrait still gets auto-positioned
-        # above the North Arrow since nobody's placed it by hand there.
-        if layoutP:
-            self._position_beat_labels_above_north_arrow(layoutP, beat_label_els_P, messages)
+        # Landscape's "BEAT NAME" element is manually positioned in the
+        # layout itself - leave it alone. Portrait's is right-aligned on the
+        # title line per page (_right_align_beat_label), since its width
+        # depends on the beat name.
 
         # Salt/Plow road-class mode: full network stays visible as a plain
         # gray background, with a persistent per-beat "highlight" layer
@@ -2277,8 +2400,25 @@ class ExportBeatMapSeries(object):
                 "sdwk_side field missing) - falling back to each layer's own symbology.")
         # background layers' own renderers, put back after the run
         original_renderers = []
+        # BPX points belong on BPX maps only: any visible TS_BS_PXO layer in
+        # the printed map(s) is hidden for other activities (it printed every
+        # bus stop across a DLA page, 2026-10-13) and turned back on at the end
+        if not bpx_mode:
+            bpx_table = BPX_POINTS_SDE_PATH.split(".")[-1].lower()
+            for map_obj in {id(mfL.map): mfL.map, id(mfP.map): mfP.map}.values():
+                for lyr in map_obj.listLayers():
+                    try:
+                        if (lyr.isFeatureLayer and lyr.visible
+                                and lyr.dataSource.lower().split(".")[-1] == bpx_table):
+                            cim = lyr.getDefinition("V3")
+                            original_renderers.append((lyr, cim.renderer, cim.labelClasses, lyr.showLabels, True))
+                            lyr.visible = False
+                            messages.addMessage(f"Hid '{lyr.name}' (BPX points) for this {activity} run.")
+                    except Exception:
+                        continue
         # flat single-color route (CT / ROW), see ROUTE_STYLE_BY_ACTIVITY
         route_style = ROUTE_STYLE_BY_ACTIVITY.get(activity)
+        dla_mode = activity == "DLA"
 
         equipment_field_L = None
         equipment_field_P = None
@@ -2316,6 +2456,12 @@ class ExportBeatMapSeries(object):
                     lay, mf, fit_layers, beat_field, kms_field, aprx.defaultGeodatabase, messages)
                 legend_ref = self._setup_flat_route_legend_reference(
                     mf, fit_layers, beat_field, route_style, messages)
+                legend_layers = [legend_ref[0]]
+            elif dla_mode:
+                self._style_background(fit_layers, original_renderers, ref_label_classes_basemap, messages)
+                self._rebuild_dla_stats_table(
+                    lay, mf, fit_layers, beat_field, kms_field, aprx.defaultGeodatabase, messages)
+                legend_ref = self._setup_dla_legend_reference(mf, fit_layers, lay.name, messages)
                 legend_layers = [legend_ref[0]]
             elif bpx_mode:
                 streets = street_layers_L if lay is layoutL else street_layers_P
@@ -2410,6 +2556,8 @@ class ExportBeatMapSeries(object):
                 self._place_camera(mf, box_P, heading, scale_P)
 
             self._set_beat_label_text(beat_label_els, beat)
+            if not use_landscape:
+                self._right_align_beat_label(layout, mf, beat_label_els)
 
             saved_defs = self._filter_anno_for_current_beat(
                 fit_layers, anno_layers, beat_field, beat, anno_distance)
@@ -2425,6 +2573,10 @@ class ExportBeatMapSeries(object):
                 beat_layer_records = self._swap_in_beat_only_layers(
                     mf, fit_layers, beat_field, beat, arcpy.env.scratchGDB, ref_label_classes, messages,
                     hide_original=False, ref_renderer=(side_renderer, SIDEWALK_SIDE_FIELD_CANDIDATES))
+            elif dla_mode:
+                beat_layer_records = self._swap_in_beat_only_layers(
+                    mf, fit_layers, beat_field, beat, arcpy.env.scratchGDB, ref_label_classes, messages,
+                    hide_original=False, dla_passes=True)
             elif bpx_mode:
                 beat_layer_records = self._swap_in_beat_only_layers(
                     mf, fit_layers, beat_field, beat, arcpy.env.scratchGDB, ref_label_classes, messages,
