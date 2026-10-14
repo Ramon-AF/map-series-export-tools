@@ -2422,10 +2422,13 @@ class ExportBeatMapSeries(object):
         else:
             fit_layers_L = self._visible_fit_layers(mfL, beat_field)
             fit_layers_P = self._visible_fit_layers(mfP, beat_field) if mfP is not mfL else fit_layers_L
-            if not fit_layers_L and activity != "BPX":
-                # nothing in the map carries the beat field (e.g. a freshly
-                # imported layout) - add the streets from the database
-                for map_obj in {id(mfL.map): mfL.map, id(mfP.map): mfP.map}.values():
+            if (not fit_layers_L or not fit_layers_P) and activity != "BPX":
+                # a map with nothing carrying the beat field (e.g. a freshly
+                # imported layout) gets the streets from the database - each
+                # map on its own, since Landscape can have them while Portrait
+                # doesn't (otherwise portrait pages print with no route)
+                need = ([mfL.map] if not fit_layers_L else []) + ([mfP.map] if not fit_layers_P else [])
+                for map_obj in {id(m): m for m in need}.values():
                     lyr, added = self._find_or_add_layer(map_obj, _ds(STREETS_TABLE))
                     lyr.visible = True
                     if added:
