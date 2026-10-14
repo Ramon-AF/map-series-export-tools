@@ -630,7 +630,11 @@ class ExportBeatMapSeries(object):
         except Exception:
             return
 
-        if p_activity.value and not p_beat_field.altered:
+        # re-suggest the beat field whenever Activity has just changed - once
+        # the tool fills Beat Field, Pro counts it as altered, so checking
+        # p_beat_field.altered alone left it stuck on the first activity's field
+        activity_changed = not p_activity.hasBeenValidated
+        if p_activity.value and (activity_changed or not p_beat_field.altered):
             candidates = BEAT_FIELD_CANDIDATES.get(str(p_activity.value), [])
             real_fields = set()
             for lyr in layers:
