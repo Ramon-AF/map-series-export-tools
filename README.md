@@ -45,6 +45,14 @@ the user's own connection); Portrait beat label (was saved hidden and ran past t
 table moved clear of the Beat Stats table; DLA hides labels on unserviced local roads. The "own project" setup was
 tested end to end in a stripped project (no maps or layouts) for BPX, Sidewalk, Salt/Plow and DLA.
 
+On 2026-10-14 the tool was run live in a brand-new project (no maps or layouts, own connections). That run found two
+bugs, both fixed and confirmed live the same day:
+- **Activity change:** changing Activity didn't update Beat Field, so the Contract Area and Beat(s) lists stayed on the
+  first activity's beats. Beat Field is now re-picked whenever Activity changes.
+- **Portrait pages without a route:** when the Landscape map had the streets layer but the Portrait map didn't, portrait
+  pages (e.g. SW121, SW1210) printed with no route, Beat Stats table or legend. Each map is now checked on its own and
+  gets `TCL_WINTER_OPERATIONS` if it's missing or turned off.
+
 ## Data and output
 - All data is read from **QA** (`winterops_qa`) through the user's own connection: streets and beats from the
   `TCL_WINTER_OPERATIONS` layer in the layout's map, plus `BEAT_EQUIPMENT_ASSIGNMENT` and `TS_BS_PXO`.
@@ -76,11 +84,14 @@ tested end to end in a stripped project (no maps or layouts) for BPX, Sidewalk, 
 3. Add the toolbox (Catalog → Toolboxes → Add Toolbox), open **Export Map Series By Beat**, pick the activity and
    an output folder, and run. Leave **Landscape Layout** blank.
 
+It's a Python toolbox, so the project stays linked to the `.pyt` file. After downloading a newer version over it,
+close the tool and right-click the toolbox → **Refresh** (or reopen Pro) to pick up the changes.
+
 What happens on the first run in a new project:
 - If the project doesn't have the "Universal Beat Map Series - Landscape" / "- Portrait" layouts, they're added
   from `MapSeriesExportTools_templates` (each brings its own map). If you already imported the layouts someone
   shared with you, those are used instead.
-- `TCL_WINTER_OPERATIONS` is added to the layout's map from your connection.
+- `TCL_WINTER_OPERATIONS` is added from your connection to the Landscape and Portrait maps, each checked separately.
 - Symbology comes with the tool: street labels (bold on the route, regular in the background), the Sidewalk colours
   and legend, and the BPX symbols are read from the `.lyrx` files in the templates folder. If your project has a
   "Sidewalks" map with the reference layers, those win, so restyling them there changes the printed maps.
