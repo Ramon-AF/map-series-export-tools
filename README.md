@@ -53,9 +53,20 @@ bugs, both fixed and confirmed live the same day:
   pages (e.g. SW121, SW1210) printed with no route, Beat Stats table or legend. Each map is now checked on its own and
   gets `TCL_WINTER_OPERATIONS` if it's missing or turned off.
 
+Added 2026-10-15, tested outside Pro but not yet in a live run:
+- **QA / Production switch** (new **Database** setting, see Data and output). Tested on Sidewalk SW1210 and BPX1110
+  in a blank project and in a copy of the master project; the map was put back after each run.
+- **Root cause of the portrait bug above:** after each run the tool restores the layers it restyled, but it tracked
+  them by name, and both maps have a layer called `TCL_WINTER_OPERATIONS`. Only the Landscape one was restored; the
+  Portrait one was left gray and turned off. Layers are now tracked by their unique ID in the project.
+
 ## Data and output
-- All data is read from **QA** (`winterops_qa`) through the user's own connection: streets and beats from the
-  `TCL_WINTER_OPERATIONS` layer in the layout's map, plus `BEAT_EQUIPMENT_ASSIGNMENT` and `TS_BS_PXO`.
+- The **Database** setting picks where the data comes from: **QA** (`winterops_qa`, the default) or **Production**
+  (`winterops_production`). Both have the same schema. Data is read through the user's own connection to that
+  database: streets and beats from `TCL_WINTER_OPERATIONS`, plus `BEAT_EQUIPMENT_ASSIGNMENT` and `TS_BS_PXO`.
+- If the project's maps already hold layers from the other database (e.g. the QA streets on a Production run), those
+  are turned off for the run, the chosen database's streets are added in their place, and the map is put back as it
+  was afterwards. The older `winterops` database isn't supported (different schema).
 - **Beat Stats tables** are written to the **default geodatabase of the open project** (created on the first run,
   emptied and refilled on every run): `MapSeriesExport_BeatStats_v2`, `_RoadClass_v1`, `_BPX_v1`, `_DLA_v1`.
   Each user should have their own project or default geodatabase. Two people sharing one geodatabase at the
@@ -66,21 +77,21 @@ bugs, both fixed and confirmed live the same day:
 1. Live test Cycle Tracks (try CT142) and ROW.
 2. **ROW equipment:** needs a `row_beat` column on `BEAT_EQUIPMENT_ASSIGNMENT`.
 3. Remove the temporary `CHECKPOINT` debug messages in `execute()`.
-4. Optional: a QA / production switch (staying on QA for now).
+4. Live test the QA / Production switch in Pro (tested outside Pro only so far).
 5. The Portrait layout's scale bar sits below the bottom border (layout setting, not the tool).
 6. Live test of the "own project" setup by a second user.
 
 ## Requirements
 - ArcGIS Pro 3.x
-- Your own database connection (`.sde`) to `winterops_qa`. Not included here, because connection files contain
-  credentials.
+- Your own database connection (`.sde`) to `winterops_qa`, and to `winterops_production` if you'll print from
+  Production. Not included here, because connection files contain credentials.
 
 ## Using it in your own project
 1. Download the repo and keep `MapSeriesExportTools.pyt` and the `MapSeriesExportTools_templates` folder
    **side by side**.
 2. In your project, make a database connection to `winterops_qa` (Catalog → Databases → New Database Connection)
-   and save the `.sde` in your project folder. The tool finds it automatically; or pick it in the tool's
-   **Database Connection** setting.
+   and save the `.sde` in your project folder; do the same for `winterops_production` if you'll use Production. The
+   tool finds the right one for the **Database** setting automatically, or pick it in **Database Connection**.
 3. Add the toolbox (Catalog → Toolboxes → Add Toolbox), open **Export Map Series By Beat**, pick the activity and
    an output folder, and run. Leave **Landscape Layout** blank.
 

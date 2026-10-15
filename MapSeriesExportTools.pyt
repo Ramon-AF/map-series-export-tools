@@ -94,14 +94,17 @@ _DISTINCT_VALUE_CACHE = {}
 # Every enterprise dataset is read through the user's OWN connection file to
 # this database: the "Database Connection" parameter if set, else the first
 # .sde found (project's database connections, project folder, toolbox
-# folder) whose database is DATABASE_NAME. See _find_connection.
-DATABASE_NAME = "winterops_qa"
-DATASET_PREFIX = "winterops_qa.gisadmin."
+# folder) whose database is the one picked in the "Database" parameter
+# (QA by default). See _find_connection. Both databases have the same
+# schema (checked 2026-10-14). The older "winterops" database is NOT one of
+# these - different schema, no TCL_WINTER_OPERATIONS.
+DATABASES = {"QA": "winterops_qa", "Production": "winterops_production"}
+DEFAULT_DATABASE = "QA"
 STREETS_TABLE = "TCL_WINTER_OPERATIONS"
 BPX_POINTS_TABLE = "TS_BS_PXO"
 EQUIPMENT_TABLE = "BEAT_EQUIPMENT_ASSIGNMENT"
-# set by updateParameters/execute from the parameter (or auto-found)
-_CONNECTION = {"path": None}
+# set by updateParameters/execute from the parameters (or auto-found)
+_CONNECTION = {"path": None, "database": DATABASES[DEFAULT_DATABASE]}
 
 # ---- bundled templates (ship next to this .pyt) ----
 # Used when the open project doesn't have its own: the two Universal
@@ -247,15 +250,38 @@ TEMPLATE_LAYER_FILES = {
 }
 
 
+def _db():
+    """Name of the database being read this run (winterops_qa or _production)."""
+    return _CONNECTION["database"]
+
+
+def _use_database(choice, explicit_connection=None):
+    """Point the tool at the QA or Production database. Switching drops the
+    cached connection, which belongs to the other database."""
+    db = DATABASES.get(str(choice or DEFAULT_DATABASE), DATABASES[DEFAULT_DATABASE])
+    if db != _CONNECTION["database"]:
+        _CONNECTION["database"] = db
+        _CONNECTION["path"] = None
+    if explicit_connection:
+        _CONNECTION["path"] = explicit_connection
+
+
+def _from_other_database(lyr):
+    """True for a layer/table/path that reads one of DATABASES other than the
+    one picked - e.g. the QA streets layer in a map on a Production run."""
+    src = str(getattr(lyr, "dataSource", lyr) or "").lower()
+    return any(f"{d}.gisadmin." in src for d in DATABASES.values() if d != _db())
+
+
 def _is_our_database(sde):
     try:
-        return arcpy.Describe(sde).connectionProperties.database.lower() == DATABASE_NAME
+        return arcpy.Describe(sde).connectionProperties.database.lower() == _db()
     except Exception:
         return False
 
 
 def _find_connection(explicit=None):
-    """Path of the user's .sde connection to DATABASE_NAME, or None."""
+    """Path of the user's .sde connection to the picked database, or None."""
     if explicit:
         return explicit
     if _CONNECTION["path"] and arcpy.Exists(_CONNECTION["path"]):
@@ -276,7 +302,7 @@ def _find_connection(explicit=None):
         except Exception:
             continue
     # name hint first (cheap), then ask each file which database it is
-    candidates.sort(key=lambda p: DATABASE_NAME not in os.path.basename(p).lower())
+    candidates.sort(key=lambda p: _db() not in os.path.basename(p).lower())
     for c in candidates:
         if c and os.path.exists(c) and _is_our_database(c):
             _CONNECTION["path"] = c
@@ -289,10 +315,10 @@ def _ds(table):
     sde = _find_connection()
     if not sde:
         raise RuntimeError(
-            f"No database connection to '{DATABASE_NAME}' found. Make a database connection to it "
+            f"No database connection to '{_db()}' found. Make a database connection to it "
             f"(Catalog > Databases > New Database Connection), save the .sde in your project folder, "
             f"or pick it in this tool's 'Database Connection' setting.")
-    return os.path.join(sde, DATASET_PREFIX + table)
+    return os.path.join(sde, f"{_db()}.gisadmin.{table}")
 
 
 TITLE_TEXT_BY_ACTIVITY = {
@@ -468,16 +494,26 @@ class ExportBeatMapSeries(object):
             direction="Input")
 
         p_connection = arcpy.Parameter(
-            displayName=f"Database Connection (optional - your .sde to {DATABASE_NAME}; found automatically if blank)",
+            displayName="Database Connection (optional - your .sde to the database below; found automatically if blank)",
             name="connection",
             datatype="DEWorkspace",
             parameterType="Optional",
             direction="Input")
 
+        p_database = arcpy.Parameter(
+            displayName="Database (QA = winterops_qa, Production = winterops_production)",
+            name="database",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
+        p_database.filter.type = "ValueList"
+        p_database.filter.list = list(DATABASES)
+        p_database.value = DEFAULT_DATABASE
+
         return [p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
                 p_contract_area, p_beats,
                 p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-                p_heading, p_dpi, p_equip_field_override, p_connection]
+                p_heading, p_dpi, p_equip_field_override, p_connection, p_database]
 
     def isLicensed(self):
         return True
@@ -609,12 +645,14 @@ class ExportBeatMapSeries(object):
         (p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
          p_contract_area, p_beats,
          p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-         p_heading, p_dpi, p_equip_field_override, p_connection) = parameters
+         p_heading, p_dpi, p_equip_field_override, p_connection, p_database) = parameters
 
-        if p_connection.valueAsText:
-            _CONNECTION["path"] = p_connection.valueAsText
+        _use_database(p_database.value, p_connection.valueAsText)
         try:
-            layers = self._candidate_layers(p_layout_l, p_map, p_map_layers)
+            # a map layer reading the other database (e.g. the QA streets on
+            # a Production run) never feeds the dropdowns
+            layers = [l for l in self._candidate_layers(p_layout_l, p_map, p_map_layers)
+                      if not _from_other_database(l)]
         except Exception:
             layers = []
         try:
@@ -685,6 +723,13 @@ class ExportBeatMapSeries(object):
         if p_contract_area.valueAsText and not p_contract_area.filter.list:
             p_contract_area.setWarningMessage(
                 "None of the layers being used have a contract area field - this filter will fail at run time.")
+        p_connection, p_database = parameters[15], parameters[16]
+        if p_connection.valueAsText:
+            _use_database(p_database.value)
+            if not _is_our_database(p_connection.valueAsText):
+                p_connection.setErrorMessage(
+                    f"This connection isn't to {_db()}. Pick a connection to {_db()}, "
+                    f"or leave this blank to find one automatically.")
         return
 
     # ---------------- helpers ----------------
@@ -733,6 +778,8 @@ class ExportBeatMapSeries(object):
                 continue
             if lyr.name.startswith(TOOL_LAYER_NAME_PREFIXES):
                 continue
+            if _from_other_database(lyr):
+                continue
             try:
                 d = arcpy.Describe(lyr)
                 if d.featureType == "Annotation":
@@ -743,6 +790,25 @@ class ExportBeatMapSeries(object):
             if target_field in fields:
                 out.append(lyr)
         return out
+
+    @staticmethod
+    def _hide_other_database_layers(maps, messages):
+        """Turn off, for this run only, every visible layer reading the other
+        database (e.g. the QA streets on a Production run) so it doesn't draw
+        on the pages. Returns [(map, layer)] to turn back on at the end."""
+        hidden = []
+        for m in maps:
+            for lyr in m.listLayers():
+                try:
+                    if lyr.visible and not lyr.isGroupLayer and _from_other_database(lyr):
+                        lyr.visible = False
+                        hidden.append((m, lyr))
+                except Exception:
+                    continue
+        if hidden:
+            messages.addMessage(
+                f"Turned off for this run (they read the other database): {sorted({l.name for _, l in hidden})}")
+        return hidden
 
     def _visible_anno_layers(self, mf):
         """Visible layers that are true Annotation feature classes."""
@@ -1242,6 +1308,23 @@ class ExportBeatMapSeries(object):
                 it.label = ROADCLASS_LABELS.get(code, code)
         lyr.symbology = sym
 
+    @staticmethod
+    def _layer_key(lyr):
+        """Identity of a layer across separate listLayers() calls. Not the
+        name: Landscape and Portrait both have a 'TCL_WINTER_OPERATIONS', and
+        keying on the name meant only the Landscape one was ever restored -
+        the Portrait one was left gray and turned off after every run, so the
+        next run found no streets there (SW121/SW1210 printed blank,
+        2026-10-14). The CIM URI includes the map, so it's unique."""
+        try:
+            return lyr.getDefinition("V3").uRI or lyr.longName
+        except Exception:
+            return id(lyr)
+
+    def _already_saved(self, lyr, original_renderers):
+        key = self._layer_key(lyr)
+        return any(saved[0] is lyr or self._layer_key(saved[0]) == key for saved in original_renderers)
+
     def _style_background(self, fit_layers, original_renderers, basemap_label_classes, messages):
         """Full street network kept visible behind the beat route as a thin
         plain gray line (BACKGROUND_STREET_SYMBOLOGY - per Ramon, all
@@ -1249,7 +1332,7 @@ class ExportBeatMapSeries(object):
         renderer and labeling are saved into original_renderers (once) so
         execute() can put them back after the run."""
         for lyr in fit_layers:
-            if not any(saved[0] is lyr or saved[0].name == lyr.name for saved in original_renderers):
+            if not self._already_saved(lyr, original_renderers):
                 cim = lyr.getDefinition("V3")
                 original_renderers.append((lyr, cim.renderer, cim.labelClasses, lyr.showLabels, lyr.visible))
             # The real layer is HIDDEN for the run - its background lines
@@ -1998,10 +2081,12 @@ class ExportBeatMapSeries(object):
     @staticmethod
     def _ensure_table_in_map(map_obj, table_path, table_name):
         """Add a table to the map if it isn't already there, and return the
-        Table object either way."""
+        Table object either way. Matched on the full database-qualified
+        name, so a Production run doesn't pick up the QA copy (or v.v.)."""
+        qualified = table_path.split("\\")[-1].lower()
         def _match(t):
             try:
-                return t.name == table_name or t.dataSource.lower().endswith("." + table_name.lower())
+                return t.dataSource.lower().endswith(qualified)
             except Exception:
                 return False
         existing = next((t for t in map_obj.listTables() if _match(t)), None)
@@ -2316,8 +2401,11 @@ class ExportBeatMapSeries(object):
         (p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
          p_contract_area, p_beats,
          p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-         p_heading, p_dpi, p_equip_field_override, p_connection) = parameters
+         p_heading, p_dpi, p_equip_field_override, p_connection, p_database) = parameters
+        _use_database(p_database.value)
         _CONNECTION["path"] = p_connection.valueAsText or None
+        if _CONNECTION["path"] and not _is_our_database(_CONNECTION["path"]):
+            raise RuntimeError(f"The Database Connection setting isn't a connection to {_db()}.")
 
         activity = str(p_activity.value)
         self._activity = activity
@@ -2406,6 +2494,16 @@ class ExportBeatMapSeries(object):
             self._cleanup_stale_route_highlight_layers(mfP.map, messages)
             messages.addMessage("CHECKPOINT 12: self-heal on mfP.map done")
 
+        messages.addMessage(f"Reading from {_db()} through {_find_connection() or '(no connection found yet)'}")
+        # layers reading the other database stay off for the run (turned
+        # back on at the end); the picked database's streets get added in
+        # their place below and taken out again afterwards
+        # maps keyed by name: mf.map hands back a new Python object every time
+        other_db_hidden = self._hide_other_database_layers(
+            {mfL.map.name: mfL.map, mfP.map.name: mfP.map}.values(), messages)
+        swap_maps = {m.name for m, _ in other_db_hidden}
+        swap_added = []         # (map, layer, added_by_us, was_visible) to undo at the end
+
         # --- fit layers: explicit selection if given, else auto-detect from visible layers ---
         selected_names = [getattr(v, "name", None) for v in (p_map_layers.values or [])]
         selected_names = [n for n in selected_names if n]
@@ -2416,6 +2514,11 @@ class ExportBeatMapSeries(object):
             if missing:
                 raise RuntimeError(
                     f"Selected map layer(s) not found in the Landscape Layout's map: {sorted(missing)}")
+            wrong_db = sorted({l.name for l in fit_layers_L if _from_other_database(l)})
+            if wrong_db:
+                raise RuntimeError(
+                    f"Selected map layer(s) {wrong_db} read the other database, not {_db()}. "
+                    f"Clear 'Map Layer(s)' to let the tool use {_db()}, or switch the Database setting.")
             fit_layers_P = ([l for l in mfP.map.listLayers() if l.name in selected_names]
                              if mfP is not mfL else fit_layers_L)
             messages.addMessage(f"Using selected layer(s): {[l.name for l in fit_layers_L]}")
@@ -2428,11 +2531,15 @@ class ExportBeatMapSeries(object):
                 # map on its own, since Landscape can have them while Portrait
                 # doesn't (otherwise portrait pages print with no route)
                 need = ([mfL.map] if not fit_layers_L else []) + ([mfP.map] if not fit_layers_P else [])
-                for map_obj in {id(m): m for m in need}.values():
+                for map_obj in {m.name: m for m in need}.values():
                     lyr, added = self._find_or_add_layer(map_obj, _ds(STREETS_TABLE))
+                    if map_obj.name in swap_maps:
+                        # standing in for the other database's streets: undo after the run
+                        swap_added.append((map_obj, lyr, added, lyr.visible))
                     lyr.visible = True
                     if added:
-                        messages.addMessage(f"Added '{lyr.name}' to map '{map_obj.name}' from {_find_connection()}.")
+                        messages.addMessage(f"Added '{lyr.name}' to map '{map_obj.name}' from {_find_connection()}"
+                                            + (" for this run." if map_obj.name in swap_maps else "."))
                 fit_layers_L = self._visible_fit_layers(mfL, beat_field)
                 fit_layers_P = self._visible_fit_layers(mfP, beat_field) if mfP is not mfL else fit_layers_L
             messages.addMessage(f"Auto-detected fit layers: {[l.name for l in fit_layers_L]}")
@@ -2648,7 +2755,7 @@ class ExportBeatMapSeries(object):
                 # hidden all run (each page draws its own ACTIVE-only copy)
                 self._style_background(streets, original_renderers, ref_label_classes_basemap, messages)
                 for lyr in fit_layers:
-                    if not any(saved[0] is lyr or saved[0].name == lyr.name for saved in original_renderers):
+                    if not self._already_saved(lyr, original_renderers):
                         cim = lyr.getDefinition("V3")
                         original_renderers.append((lyr, cim.renderer, cim.labelClasses, lyr.showLabels, lyr.visible))
                     lyr.visible = False
@@ -2804,5 +2911,20 @@ class ExportBeatMapSeries(object):
                 map_obj.removeLayer(lyr)
             except Exception:
                 pass
+        # QA/Production switch: take out (or turn back off) the streets that
+        # stood in for the other database's, and turn those back on
+        for map_obj, lyr, added, was_visible in swap_added:
+            try:
+                if added:
+                    map_obj.removeLayer(lyr)
+                else:
+                    lyr.visible = was_visible
+            except Exception:
+                pass
+        for _, lyr in other_db_hidden:
+            try:
+                lyr.visible = True
+            except Exception:
+                messages.addWarningMessage(f"Couldn't turn '{lyr.name}' back on.")
 
         messages.addMessage("Finished exporting all beats successfully.")
