@@ -234,11 +234,21 @@ DLA_PASS_SYMBOLOGY = {
 BEAT_STATS_DLA_TABLE_NAME = "MapSeriesExport_BeatStats_DLA_v1"
 DLA_LEGEND_LAYER_NAME_PREFIX = "DLA Legend"
 
+# Protected features (per Ramon 2026-10-16): optional on Cycle Tracks / ROW
+# pages - the beat's PROTECTED_FEATURES points (tagged with cycle_beat /
+# row_beat), styled from MapSeriesExportTools_templates/protected_features.lyrx
+# (Ramon's PROTECTED FEATURES.lyrx from the CYCLE TRACK TEMPLATES, re-keyed
+# on protected_feature_type, plus FLEX).
+PROTECTED_FEATURES_TABLE = "PROTECTED_FEATURES"
+PF_TYPE_FIELD = "protected_feature_type"
+PF_ACTIVITIES = ("Cycle Tracks", "ROW")
+PF_LEGEND_LAYER_NAME = "PROTECTED FEATURES"
+
 # layers this tool adds itself - never auto-detected as fit layers, and
 # cleaned up at the start of a run if an earlier run left one behind
 TOOL_LAYER_NAME_PREFIXES = ((ROUTE_HIGHLIGHT_LAYER_NAME_PREFIX, SIDEWALK_LEGEND_LAYER_NAME_PREFIX)
                             + tuple(s["label"] for s in ROUTE_STYLE_BY_ACTIVITY.values())
-                            + (BPX_LEGEND_LAYER_NAME_PREFIX, DLA_LEGEND_LAYER_NAME_PREFIX))
+                            + (BPX_LEGEND_LAYER_NAME_PREFIX, DLA_LEGEND_LAYER_NAME_PREFIX, PF_LEGEND_LAYER_NAME))
 
 # reference layer name -> bundled .lyrx used when the project has no
 # "Sidewalks" map with that layer
@@ -247,6 +257,7 @@ TEMPLATE_LAYER_FILES = {
     LABEL_CLASS_BASEMAP_REFERENCE_LAYER: "street_labels_regular.lyrx",
     SIDEWALK_LEGEND_REFERENCE_LAYER: "sidewalk_legend.lyrx",
     BPX_POINTS_TABLE: "bpx_points.lyrx",
+    PROTECTED_FEATURES_TABLE: "protected_features.lyrx",
 }
 
 
@@ -510,10 +521,19 @@ class ExportBeatMapSeries(object):
         p_database.filter.list = list(DATABASES)
         p_database.value = DEFAULT_DATABASE
 
+        p_protected = arcpy.Parameter(
+            displayName="Include Protected Features (Cycle Tracks / ROW only)",
+            name="include_protected_features",
+            datatype="GPBoolean",
+            parameterType="Optional",
+            direction="Input")
+        p_protected.value = False
+        p_protected.enabled = False
+
         return [p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
                 p_contract_area, p_beats,
                 p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-                p_heading, p_dpi, p_equip_field_override, p_connection, p_database]
+                p_heading, p_dpi, p_equip_field_override, p_connection, p_database, p_protected]
 
     def isLicensed(self):
         return True
@@ -645,7 +665,13 @@ class ExportBeatMapSeries(object):
         (p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
          p_contract_area, p_beats,
          p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-         p_heading, p_dpi, p_equip_field_override, p_connection, p_database) = parameters
+         p_heading, p_dpi, p_equip_field_override, p_connection, p_database, p_protected) = parameters
+
+        # protected features only exist for Cycle Tracks / ROW - greyed out
+        # (and cleared) for every other activity
+        p_protected.enabled = str(p_activity.value) in PF_ACTIVITIES
+        if not p_protected.enabled and p_protected.value:
+            p_protected.value = False
 
         _use_database(p_database.value, p_connection.valueAsText)
         try:
@@ -1812,6 +1838,92 @@ class ExportBeatMapSeries(object):
         el.visible = True
         messages.addMessage(f"Beat Stats Table: ACTIVE BPX point counts by type for {len(counts)} beat(s).")
 
+    # ---------------- protected features (CT / ROW option) ----------------
+    @staticmethod
+    def _protected_features_renderer(messages):
+        """Renderer from the bundled protected_features.lyrx, or None."""
+        path = os.path.join(TEMPLATE_DIR, TEMPLATE_LAYER_FILES[PROTECTED_FEATURES_TABLE])
+        try:
+            r = arcpy.mp.LayerFile(path).listLayers()[0].getDefinition("V3").renderer
+            messages.addMessage(f"Protected features symbology from {os.path.basename(path)}.")
+            return r
+        except Exception as e:
+            messages.addWarningMessage(
+                f"Couldn't read {path} ({e}) - protected features will use Pro's default symbol.")
+            return None
+
+    @staticmethod
+    def _show_pf_legend_types(legend_lyr, renderer, types):
+        """Legend lists only the feature types on this page - all ten don't
+        fit the legend box (a beat has at most 7, most have 2-4)."""
+        if legend_lyr is None or renderer is None:
+            return
+        try:
+            cim = legend_lyr.getDefinition("V3")
+            for g_full, g in zip(renderer.groups or [], cim.renderer.groups or []):
+                g.classes = [c for c in g_full.classes if str(c.values[0].fieldValues[0]) in types]
+            legend_lyr.setDefinition(cim)
+        except Exception:
+            pass
+
+    def _add_protected_features_layer(self, mf, beat_field, beat_text, renderer, legend_lyr, messages):
+        """This page's protected features: the PROTECTED_FEATURES points
+        tagged with the beat (cycle_beat / row_beat), in a fresh per-page
+        layer like every other per-page layer. Named "beat_only..." so the
+        per-page self-heal clears a leftover one. Returns records for
+        _restore_after_beat_only_layers ([] if the beat has none)."""
+        src = _ds(PROTECTED_FEATURES_TABLE)
+        fld = arcpy.AddFieldDelimiters(src, beat_field)
+        where = f"{fld} = '{beat_text.replace(chr(39), chr(39) * 2)}'"
+        out_fc = arcpy.CreateUniqueName("beat_only_pf", arcpy.env.scratchGDB)
+        try:
+            arcpy.analysis.Select(src, out_fc, where)
+            types = {str(t) for (t,) in arcpy.da.SearchCursor(out_fc, [PF_TYPE_FIELD])}
+            n = int(arcpy.management.GetCount(out_fc)[0])
+            self._show_pf_legend_types(legend_lyr, renderer, types)
+            if not n:
+                arcpy.management.Delete(out_fc)
+                messages.addMessage(f"{beat_text}: no protected features.")
+                return []
+            new_lyr = mf.map.addDataFromPath(out_fc)
+            if renderer is not None:
+                self._apply_reference_renderer(new_lyr, renderer, [PF_TYPE_FIELD])
+            new_lyr.showLabels = False
+            new_lyr.visible = True
+            mf.map.moveLayer(mf.map.listLayers()[0], new_lyr, "BEFORE")   # draw on top
+            messages.addMessage(f"{beat_text}: {n} protected feature(s).")
+            # no original layer to put back (the restore's lyr.* calls on
+            # None just fall into its except)
+            return [(None, new_lyr, out_fc)]
+        except Exception as e:
+            messages.addWarningMessage(f"{beat_text}: couldn't add protected features ({e}).")
+            if arcpy.Exists(out_fc):
+                arcpy.management.Delete(out_fc)
+            return []
+
+    def _setup_protected_features_legend(self, mf, beat_field, renderer, messages):
+        """Hidden, run-scoped helper so the legend shows the feature types
+        under a PROTECTED FEATURES heading. One per map (Landscape/Portrait
+        sharing a map share it)."""
+        existing = next((l for l in mf.map.listLayers() if l.name == PF_LEGEND_LAYER_NAME), None)
+        if existing:
+            return existing
+        src = _ds(PROTECTED_FEATURES_TABLE)
+        out_fc = arcpy.CreateUniqueName("pf_legend_ref", arcpy.env.scratchGDB)
+        arcpy.analysis.Select(src, out_fc, f"{arcpy.AddFieldDelimiters(src, beat_field)} IS NOT NULL")
+        new_lyr = mf.map.addDataFromPath(out_fc)
+        new_lyr.name = PF_LEGEND_LAYER_NAME
+        if renderer is not None:
+            self._apply_reference_renderer(new_lyr, renderer, [PF_TYPE_FIELD])
+            cim = new_lyr.getDefinition("V3")
+            cim.renderer.useDefaultSymbol = False
+            for g in cim.renderer.groups or []:
+                g.heading = ""
+            new_lyr.setDefinition(cim)
+        new_lyr.visible = False
+        messages.addMessage(f"Built protected features legend layer in map '{mf.map.name}'.")
+        return new_lyr
+
     @staticmethod
     def _hide_legend_item_heading(layout, layer_name):
         """Legend entry shows just the classes, not the helper layer's name."""
@@ -1942,6 +2054,9 @@ class ExportBeatMapSeries(object):
         # back. Since this method already fully manages legend contents
         # itself, turn autoAdd off so its own logic is authoritative.
         cim.autoAdd = False
+        # keep the order the tool adds items in (route first, then e.g.
+        # protected features) instead of the map's layer order
+        cim.autoReorder = False
         if cim.items:
             # Filter the CIM item list directly and commit once, rather
             # than calling leg.removeItem() per stale item in a loop - doing
@@ -1969,6 +2084,9 @@ class ExportBeatMapSeries(object):
         cim = leg.getDefinition("V3")
         for ci in cim.items or []:
             ci.isVisible = True
+        # same order as fit_layers (route first, then e.g. protected features)
+        order = [l.name for l in fit_layers]
+        cim.items = sorted(cim.items or [], key=lambda ci: order.index(ci.name) if ci.name in order else len(order))
         leg.setDefinition(cim)
         messages.addMessage(f"Legend rebuilt for: {sorted(fit_names)}")
 
@@ -2401,7 +2519,7 @@ class ExportBeatMapSeries(object):
         (p_activity, p_layout_l, p_layout_p, p_map, p_map_layers, p_beat_field,
          p_contract_area, p_beats,
          p_anno_dist, p_out_dir, p_margin, p_use_rotation,
-         p_heading, p_dpi, p_equip_field_override, p_connection, p_database) = parameters
+         p_heading, p_dpi, p_equip_field_override, p_connection, p_database, p_protected) = parameters
         _use_database(p_database.value)
         _CONNECTION["path"] = p_connection.valueAsText or None
         if _CONNECTION["path"] and not _is_our_database(_CONNECTION["path"]):
@@ -2705,6 +2823,11 @@ class ExportBeatMapSeries(object):
         # flat single-color route (CT / ROW), see ROUTE_STYLE_BY_ACTIVITY
         route_style = ROUTE_STYLE_BY_ACTIVITY.get(activity)
         dla_mode = activity == "DLA"
+        # optional protected features on CT / ROW pages
+        pf_mode = bool(p_protected.value) and activity in PF_ACTIVITIES
+        pf_renderer = self._protected_features_renderer(messages) if pf_mode else None
+        pf_legend_layers = {}   # map name -> hidden legend helper, removed at the end
+        pf_legend_fonts = []    # (legend, original minFontSize), put back at the end
 
         equipment_field_L = None
         equipment_field_P = None
@@ -2743,6 +2866,13 @@ class ExportBeatMapSeries(object):
                 legend_ref = self._setup_flat_route_legend_reference(
                     mf, fit_layers, beat_field, route_style, messages)
                 legend_layers = [legend_ref[0]]
+                if pf_mode:
+                    # per Ramon 2026-10-16: legend = just each feature's
+                    # symbol + name (no route entry, no heading)
+                    if mf.map.name not in pf_legend_layers:
+                        pf_legend_layers[mf.map.name] = (mf.map, self._setup_protected_features_legend(
+                            mf, beat_field, pf_renderer, messages))
+                    legend_layers = [pf_legend_layers[mf.map.name][1]]
             elif dla_mode:
                 self._style_background(fit_layers, original_renderers, ref_label_classes_basemap, messages)
                 self._rebuild_dla_stats_table(
@@ -2775,10 +2905,42 @@ class ExportBeatMapSeries(object):
                 legend_ref_P = legend_ref
 
             self._rebuild_legend(lay, legend_layers, messages)
-            # every helper legend layer (incl. Salt/Plow's "Route (by Road
+            if pf_mode:
+                # route + up to 7 feature types don't fit the legend box at
+                # the layout's 10 pt minimum - let it shrink/wrap for this run
+                leg = next((e for e in lay.listElements() if type(e).__name__ == "LegendElement"), None)
+                if leg is not None:
+                    lcim = leg.getDefinition("V3")
+                    spacing = ("itemGap", "classGap", "layerNameGap", "headingGap", "patchGap", "textGap",
+                               "defaultPatchHeight", "defaultPatchWidth")
+                    pf_legend_fonts.append((leg, lcim.minFontSize, lcim.fittingStrategy, lcim.columns,
+                                            lcim.labelWidth, lcim.descriptionWidth,
+                                            {k: getattr(lcim, k) for k in spacing}))
+                    lcim.minFontSize = 6
+                    # the layouts reserve ~3" per label column - wider than
+                    # the legend box, so a 2nd column never fits
+                    col_pt = leg.elementWidth * 72 / 2
+                    lcim.defaultPatchWidth, lcim.defaultPatchHeight = 14, 8
+                    lcim.labelWidth = lcim.descriptionWidth = col_pt - 14 - 8
+                    # tighter rows so route + heading + 4 types fit a column
+                    for k in ("itemGap", "classGap", "layerNameGap", "headingGap"):
+                        setattr(lcim, k, 2)
+                    lcim.patchGap = lcim.textGap = 3
+                    for ci in lcim.items or []:
+                        # let the feature types flow into the next column
+                        ci.keepTogether = False
+                    leg.setDefinition(lcim)
+                    # the layouts' AdjustColumnsAndSize grows the box past
+                    # the page border instead of wrapping into columns. Set
+                    # through arcpy - the CIM silently turns this value into
+                    # AdjustSize.
+                    leg.fittingStrategy = "ManualColumns"
+                    leg.columnCount = 2            # every helper legend layer (incl. Salt/Plow's "Route (by Road
             # Class) (...)") shows just its classes, never its own name
             if legend_ref and legend_ref[0].name.startswith(TOOL_LAYER_NAME_PREFIXES):
                 self._hide_legend_item_heading(lay, legend_ref[0].name)
+            if pf_mode and route_style:
+                self._hide_legend_item_heading(lay, PF_LEGEND_LAYER_NAME)
             # table look lives on the layouts themselves (set 2026-10-08) and
             # is kept through column changes by _set_table_fields
             eq_field = self._bind_equipment_table(lay, mf, activity, equip_field_override, messages)
@@ -2872,6 +3034,10 @@ class ExportBeatMapSeries(object):
                 beat_layer_records = self._swap_in_beat_only_layers(
                     mf, fit_layers, beat_field, beat, arcpy.env.scratchGDB, ref_label_classes, messages,
                     hide_original=False, highlight_style=route_style)
+                if pf_mode:
+                    beat_layer_records = beat_layer_records + self._add_protected_features_layer(
+                        mf, beat_field, beat, pf_renderer,
+                        pf_legend_layers.get(mf.map.name, (None, None))[1], messages)
             else:
                 beat_layer_records = self._swap_in_beat_only_layers(
                     mf, fit_layers, beat_field, beat, arcpy.env.scratchGDB, ref_label_classes, messages)
@@ -2909,6 +3075,23 @@ class ExportBeatMapSeries(object):
         for map_obj, lyr in bpx_added:
             try:
                 map_obj.removeLayer(lyr)
+            except Exception:
+                pass
+        for map_obj, lyr in pf_legend_layers.values():
+            try:
+                map_obj.removeLayer(lyr)
+            except Exception:
+                pass
+        for leg, min_font, fitting, columns, label_w, desc_w, spacing in pf_legend_fonts:
+            try:
+                lcim = leg.getDefinition("V3")
+                lcim.minFontSize = min_font
+                lcim.fittingStrategy = fitting
+                lcim.columns = columns
+                lcim.labelWidth, lcim.descriptionWidth = label_w, desc_w
+                for k, v in spacing.items():
+                    setattr(lcim, k, v)
+                leg.setDefinition(lcim)
             except Exception:
                 pass
         # QA/Production switch: take out (or turn back off) the streets that

@@ -17,8 +17,14 @@ legend, Beat Stats table and Equipment table for each page.
 | Sidewalk | SIDEWALK SALTING & PLOWING | `sidewalk_beat` | Copied from the sidewalk reference layers in the "Sidewalks" map; contracted beats only | BEAT / KMS | Yes |
 | BPX | BUS STOPS, TRAFFIC SIGNALS & PXOs | `bpx_beat` | `TS_BS_PXO` points, ACTIVE only, styled from the project's own `TS_BS_PXO` layer; streets the points sit on are labeled bold | BEAT / BUS STOPS / PXO / SIGNALS | Yes |
 | DLA | ANTI-ICING (DLA) | `dla_beat` | 1 pass red, 2 passes green (2 pt); local roads with no DLA beat aren't labeled | BEAT / PASSES / KMS (KMS count passes) | Yes |
-| Cycle Tracks | CYCLE TRACKS | `cycle_beat` | Red 2 pt line | BEAT / KMS | Yes |
-| ROW | ROW | `row_beat` | Blue 2 pt line | BEAT / KMS | **No** (no ROW column in `BEAT_EQUIPMENT_ASSIGNMENT`) |
+| Cycle Tracks | CYCLE TRACKS | `cycle_beat` | Red 2 pt line; optional protected features | BEAT / KMS | Yes |
+| ROW | ROW | `row_beat` | Blue 2 pt line; optional protected features | BEAT / KMS | **No** (no ROW column in `BEAT_EQUIPMENT_ASSIGNMENT`) |
+
+**Protected features (Cycle Tracks / ROW):** tick **Include Protected Features** (greyed out for other activities)
+and each page also draws the beat's `PROTECTED_FEATURES` points (tagged with `cycle_beat` / `row_beat`) from the
+chosen database, styled from `protected_features.lyrx`: platforms, concrete barriers, planters, bollards, inset bike
+boxes, median extensions, protected intersections, cycle-only blocks, contraflow diagonal diverters and in-road flex
+signs. The legend then lists only the feature types on that page, symbol + name, with no route entry or heading.
 
 Shared features:
 - **Contract Area** dropdown and **Beat(s)** checklist, to print one area or a few beats instead of the whole city.
@@ -53,6 +59,10 @@ bugs, both fixed and confirmed live the same day:
   pages (e.g. SW121, SW1210) printed with no route, Beat Stats table or legend. Each map is now checked on its own and
   gets `TCL_WINTER_OPERATIONS` if it's missing or turned off.
 
+Added 2026-10-16, tested outside Pro on CT142, CT144, CT152 and ROW141 but not yet in a live run:
+- **Include Protected Features** option for Cycle Tracks / ROW (see Activities). Legend fitting with many feature
+  types on Landscape is still tight (to tidy later).
+
 Added 2026-10-15, tested outside Pro but not yet in a live run:
 - **QA / Production switch** (new **Database** setting, see Data and output). Tested on Sidewalk SW1210 and BPX1110
   in a blank project and in a copy of the master project; the map was put back after each run.
@@ -80,6 +90,7 @@ Added 2026-10-15, tested outside Pro but not yet in a live run:
 4. Live test the QA / Production switch in Pro (tested outside Pro only so far).
 5. The Portrait layout's scale bar sits below the bottom border (layout setting, not the tool).
 6. Live test of the "own project" setup by a second user.
+7. Live test Include Protected Features; tidy the legend when a page has 6-7 feature types.
 
 ## Requirements
 - ArcGIS Pro 3.x
@@ -116,6 +127,7 @@ What happens on the first run in a new project:
 | `street_labels_regular.lyrx` | Regular background labels |
 | `sidewalk_legend.lyrx` | Sidewalk legend wording |
 | `bpx_points.lyrx` | Bus stop / PXO / traffic signal symbols |
+| `protected_features.lyrx` | Protected feature symbols (from the CYCLE TRACK TEMPLATES `PROTECTED FEATURES.lyrx`, re-keyed on `protected_feature_type`; In-road flex sign added as a blue diamond) |
 
 The files carry no passwords or server names. After changing the layouts or reference layers in the master
 project, rebuild them with `build_templates.py` (run with ArcGIS Pro's Python, Pro closed):
